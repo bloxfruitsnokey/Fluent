@@ -1750,7 +1750,7 @@ function CheckQuest()
 	end;
 end;
 -- ===== Fluent UI bootstrap (native) =====
-local Fluent = loadstring(game:HttpGet("https://github.com/bloxfruitsnokey/Fluent/tree/main/FluentUI/releases/latest/download/main.lua"))()
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local Window = Fluent:CreateWindow({
 	Title = "Simple Hub",
@@ -1758,7 +1758,7 @@ local Window = Fluent:CreateWindow({
 	TabWidth = 160,
 	Size = UDim2.fromOffset(580, 460),
 	Acrylic = true,
-	Theme = "Rose",
+	Theme = "Light",
 	MinimizeKey = Enum.KeyCode.RightControl,
 })
 
