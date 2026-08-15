@@ -63,6 +63,8 @@ local DoubleAttack = false;
 local SwordMasteryLock = 200;
 local SelectedSwordName = nil;
 local AutoSwitchSword = false;
+_G.ChooseWP = "Melee";
+_G.SelectWeapon = nil;
 local BossNotify = false;
 local RareIslandNotify = false;
 local ServerHopFunc = "Auto Farm Level";
@@ -310,7 +312,7 @@ f.Kill = function(Y, d)
 			BringEnemy();
 			EquipWeapon(_G.SelectWeapon);
 			local d = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
-			local R = d.ToolTip;
+			local R = d and tostring(d.ToolTip) or nil;
 			if R == "Blox Fruit" then
 				_tp((Y.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)) * CFrame.Angles(0, math.rad(90), 0));
 			else
@@ -339,7 +341,7 @@ f.Kill2 = function(Y, d)
 			BringEnemy();
 			EquipWeapon(_G.SelectWeapon);
 			local d = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
-			local R = d.ToolTip;
+			local R = d and tostring(d.ToolTip) or nil;
 			if R == "Blox Fruit" then
 				_tp((Y.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)) * CFrame.Angles(0, math.rad(90), 0));
 			else
@@ -368,7 +370,7 @@ f.KillSea = function(Y, d)
 			BringEnemy();
 			EquipWeapon(_G.SelectWeapon);
 			local d = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
-			local R = d.ToolTip;
+			local R = d and tostring(d.ToolTip) or nil;
 			if R == "Blox Fruit" then
 				_tp((Y.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)) * CFrame.Angles(0, math.rad(90), 0));
 			else
@@ -750,7 +752,8 @@ GetBP = function(Y)
 		return d.Backpack:FindFirstChild(Y) or d.Character:FindFirstChild(Y);
 	end;
 GetIn = function(Y)
-		for R, Q in pairs(Q.Remotes.CommF_:InvokeServer("getInventory")) do
+		local ok, inv = pcall(function() return Q.Remotes.CommF_:InvokeServer("getInventory") end);
+		for R, Q in pairs((ok and inv) or {}) do
 			if type(Q) == "table" then
 				if Q.Name == Y or d.Character:FindFirstChild(Y) or d.Backpack:FindFirstChild(Y) then
 					return true;
@@ -772,7 +775,8 @@ GetM = function(Y)
 		return 0;
 	end;
 GetWP = function(Y)
-		for R, Q in pairs(Q.Remotes.CommF_:InvokeServer("getInventory")) do
+		local ok, inv = pcall(function() return Q.Remotes.CommF_:InvokeServer("getInventory") end);
+		for R, Q in pairs((ok and inv) or {}) do
 			if type(Q) == "table" then
 				if Q.Type == "Sword" then
 					if Q.Name == Y or d.Character:FindFirstChild(Y) or d.Backpack:FindFirstChild(Y) then
@@ -1749,45 +1753,112 @@ function CheckQuest()
 		end;
 	end;
 end;
--- ===== Fluent UI bootstrap (native) =====
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+-- ===== vonlib (Redz) UI bootstrap =====
+local Library = loadstring(game:HttpGet("https://pastefy.app/9KGqRzYk/raw"))()
 
-local Window = Fluent:CreateWindow({
-	Title = "Simple Hub",
-	SubTitle = "Blox Fruits",
-	TabWidth = 160,
-	Size = UDim2.fromOffset(580, 460),
-	Acrylic = true,
-	Theme = "Light",
-	MinimizeKey = Enum.KeyCode.RightControl,
+local Window = Library:Window({
+	Name = "Star Hub",
+	SubName = "Blox Fruits",
+	Logo = "rbxassetid://130081073138836",
 })
 
--- Tabs (14) — vars match the original UI variable names
-local vz = Window:AddTab({ Title = "Farm", Icon = "sword" });
-local mz = Window:AddTab({ Title = "Config", Icon = "settings" });
-local yz = Window:AddTab({ Title = "Fighting Style", Icon = "swords" });
-local bz = Window:AddTab({ Title = "Items Farm", Icon = "package" });
-local cz = Window:AddTab({ Title = "Sea Events", Icon = "waves" });
-local Hz = Window:AddTab({ Title = "Mirage + RaceV4", Icon = "map" });
-local Sz = Window:AddTab({ Title = "Drago Dojo", Icon = "flame" });
-local oz = Window:AddTab({ Title = "Prehistoric", Icon = "bone" });
-local Zz = Window:AddTab({ Title = "Raid", Icon = "shield" });
-local Tz = Window:AddTab({ Title = "Combat PVP", Icon = "crosshair" });
-local kz = Window:AddTab({ Title = "Teleport", Icon = "map-pin" });
-local Lz = Window:AddTab({ Title = "Fruits", Icon = "cherry" });
-local Pz = Window:AddTab({ Title = "Shop", Icon = "shopping-cart" });
-local jz = Window:AddTab({ Title = "Misc", Icon = "list" });
 
--- Notify shim (keeps original nz.Notify(title, content, duration) calls working)
-local nz = {}
-function nz.Notify(title, content, duration)
-	Fluent:Notify({ Title = title, Content = content, Duration = duration })
+
+local ThemePresets = {
+	["Default"] = {
+		Accent      = Color3.fromRGB(180, 185, 190),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+	["Red"] = {
+		Accent      = Color3.fromRGB(255, 80, 80),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+	["Green"] = {
+		Accent      = Color3.fromRGB(80, 255, 120),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+	["Blue"] = {
+		Accent      = Color3.fromRGB(80, 160, 255),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+	["Purple"] = {
+		Accent      = Color3.fromRGB(200, 100, 255),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+	["Pink"] = {
+		Accent      = Color3.fromRGB(255, 100, 200),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+	["Cyan"] = {
+		Accent      = Color3.fromRGB(0, 220, 220),
+		Text        = Color3.fromRGB(255, 255, 255),
+		Background   = Color3.fromRGB(10, 11, 12),
+		Outline     = Color3.fromRGB(22, 24, 23),
+		Inline      = Color3.fromRGB(18, 20, 22),
+		Element     = Color3.fromRGB(25, 29, 31),
+	},
+};
+
+local function ApplyTheme(name)
+	local t = ThemePresets[name];
+	if not t then return end;
+	Library:ChangeTheme("Accent",     t.Accent);
+	Library:ChangeTheme("Text",       t.Text);
+	Library:ChangeTheme("Background",  t.Background);
+	Library:ChangeTheme("Outline",     t.Outline);
+	Library:ChangeTheme("Inline",      t.Inline);
+	Library:ChangeTheme("Element",     t.Element);
+end;
+
+ApplyTheme("Default");
+
+
+-- Notify shim: keeps original nz_Notify(title, content, duration) calls working
+local function nz_Notify(title, content, duration)
+	Library:Notify({ Title = title, Content = content, Duration = duration })
 end
 -- ===== end bootstrap =====
-local Gz = vz:AddSection("Farm");
-Gz:AddToggle("Gz_AddToggle_1", {
-	Title = "Auto Farm Level",
-	Description = "",
+local vz = Window:Page({ Name = "Farm", Icon = "rbxassetid://7070382432" });
+local mz = Window:Page({ Name = "Config", Icon = "rbxassetid://7070385540" });
+local yz = Window:Page({ Name = "Fighting Style", Icon = "rbxassetid://7070383104" });
+local bz = Window:Page({ Name = "Items Farm", Icon = "rbxassetid://7070382432" });
+local cz = Window:Page({ Name = "Sea Events", Icon = "rbxassetid://7070386788" });
+local Hz = Window:Page({ Name = "Mirage + RaceV4", Icon = "rbxassetid://7070383104" });
+local Sz = Window:Page({ Name = "Drago Dojo", Icon = "rbxassetid://7070386788" });
+local oz = Window:Page({ Name = "Prehistoric", Icon = "rbxassetid://7070386788" });
+local Zz = Window:Page({ Name = "Raid", Icon = "rbxassetid://7070386788" });
+local Tz = Window:Page({ Name = "Combat PVP", Icon = "rbxassetid://7070383104" });
+local kz = Window:Page({ Name = "Teleport", Icon = "rbxassetid://7070385540" });
+local Lz = Window:Page({ Name = "Fruits", Icon = "rbxassetid://7070385540" });
+local Pz = Window:Page({ Name = "Shop", Icon = "rbxassetid://7070385540" });
+local jz = Window:Page({ Name = "Misc", Icon = "rbxassetid://7070385540" });
+local Gz = vz:Section({ Name = "Farm" });
+Gz:Toggle({
+	Name = "Auto Farm Level",
 	Default = false,
 	Callback = function(Y)
 		_G.Level = Y;
@@ -1890,7 +1961,13 @@ spawn(function()
 							_tp(submarineCF);
 							if (HRP.Position - submarineCF.Position).Magnitude <= 5 then
 								local Y = { "TravelToSubmergedIsland" };
-								((game:GetService("ReplicatedStorage")).Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak")):InvokeServer(unpack(Y));
+								local Net = (game:GetService("ReplicatedStorage")).Modules.Net:FindFirstChild("RF/SubmarineWorkerSpeak");
+								if Net then
+									Net:InvokeServer(unpack(Y));
+									-- Beri jeda supaya loop tidak menembak remote tiap
+									-- iterasi selagi server memproses perpindahan.
+									task.wait(3);
+								end;
 							end;
 						end;
 					end;
@@ -1899,9 +1976,8 @@ spawn(function()
 		end;
 	end;
 end);
-Gz:AddToggle("Gz_AddToggle_2", {
-	Title = "Auto Travel Dressrosa",
-	Description = "",
+Gz:Toggle({
+	Name = "Auto Travel Dressrosa",
 	Default = false,
 	Callback = function(Y)
 		_G.TravelDres = Y;
@@ -1941,9 +2017,8 @@ spawn(function()
 		end);
 	end;
 end);
-Gz:AddToggle("Gz_AddToggle_3", {
-	Title = "Auto Zou Quest",
-	Description = "",
+Gz:Toggle({
+	Name = "Auto Zou Quest",
 	Default = false,
 	Callback = function(Y)
 		_G.Zou = Y;
@@ -2084,10 +2159,9 @@ spawn(function()
 		end);
 	end;
 end);
-local qz = vz:AddSection("Miscellanea / Quest");
-qz:AddToggle("qz_AddToggle_4", {
-	Title = "Auto Farm Nearest",
-	Description = "",
+local qz = vz:Section({ Name = "Miscellanea / Quest" });
+qz:Toggle({
+	Name = "Auto Farm Nearest",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoFarmNear = Y;
@@ -2111,9 +2185,8 @@ spawn(function()
 		end);
 	end;
 end);
-qz:AddToggle("qz_AddToggle_5", {
-	Title = "Auto Factory Raid",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Factory Raid",
 	Default = false,
 	Callback = function(Y)
 		_G.FactoryRaids = Y;
@@ -2137,9 +2210,8 @@ spawn(function()
 		end);
 	end;
 end);
-qz:AddToggle("qz_AddToggle_6", {
-	Title = "Auto Pirate Raid",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Pirate Raid",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoRaidCastle = Y;
@@ -2200,19 +2272,16 @@ spawn(function()
 		end;
 	end;
 end);
-qz:AddDropdown("qz_AddDropdown_1", {
-	Title = "Choose Material",
-	Description = "",
-	Values = v,
+qz:Dropdown({
+	Name = "Choose Material",
+	Items = v,
 	Default = nil,
-	Multi = false,
 	Callback = function(Y)
 		(getgenv()).SelectMaterial = Y;
 	end,
 });
-qz:AddToggle("qz_AddToggle_7", {
-	Title = "Auto Materials",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Materials",
 	Default = false,
 	Callback = function(Y)
 		(getgenv()).AutoMaterial = Y;
@@ -2257,9 +2326,8 @@ spawn(function()
 		end;
 	end;
 end);
-qz:AddToggle("qz_AddToggle_8", {
-	Title = "Auto Farm Ectoplasm",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Farm Ectoplasm",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoEctoplasm = Y;
@@ -2289,9 +2357,8 @@ spawn(function()
 		end);
 	end;
 end);
-qz:AddToggle("qz_AddToggle_9", {
-	Title = "Auto Done Bartilo Quest",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Done Bartilo Quest",
 	Default = false,
 	Callback = function(Y)
 		_G.Bartilo_Quest = Y;
@@ -2368,9 +2435,8 @@ spawn(function()
 		end);
 	end;
 end);
-qz:AddToggle("qz_AddToggle_10", {
-	Title = "Auto Done Citizen Quest",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Done Citizen Quest",
 	Default = false,
 	Callback = function(Y)
 		_G.CitizenQuest = Y;
@@ -2423,9 +2489,8 @@ spawn(function()
 		end);
 	end;
 end);
-qz:AddToggle("qz_AddToggle_11", {
-	Title = "Auto Training Dummy",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Training Dummy",
 	Default = false,
 	Callback = function(Y)
 		_G.DummyMan = Y;
@@ -2453,9 +2518,8 @@ spawn(function()
 		end;
 	end;
 end);
-qz:AddToggle("qz_AddToggle_12", {
-	Title = "Auto Collect Berry",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Collect Berry",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoBerry = Y;
@@ -2489,9 +2553,8 @@ spawn(function()
 		end;
 	end;
 end);
-qz:AddToggle("qz_AddToggle_13", {
-	Title = "Auto Collect Chest",
-	Description = "",
+qz:Toggle({
+	Name = "Auto Collect Chest",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoFarmChest = Y;
@@ -2528,7 +2591,7 @@ spawn(function()
 		end;
 	end;
 end);
-local Vz = vz:AddSection("Miscellanea / Fishing");
+local Vz = vz:Section({ Name = "Miscellanea / Fishing" });
 local tz = game:GetService("ReplicatedStorage");
 local Xz = game:GetService("Players");
 local hz = game:GetService("Workspace");
@@ -2633,27 +2696,24 @@ local nF = {
 		"Epic Bait",
 		"Carnivore Bait",
 	};
-Vz:AddDropdown("Vz_AddDropdown_2", {
-	Title = "Select Fishing Rod",
-	Description = "",
-	Values = KF,
+Vz:Dropdown({
+	Name = "Select Fishing Rod",
+	Items = KF,
 	Default = "Fishing Rod",
 	Callback = function(Y)
 		_G.SelectedRod = Y;
 	end,
 });
-Vz:AddDropdown("Vz_AddDropdown_3", {
-	Title = "Select Bait",
-	Description = "",
-	Values = nF,
+Vz:Dropdown({
+	Name = "Select Bait",
+	Items = nF,
 	Default = "Basic Bait",
 	Callback = function(Y)
 		_G.SelectedBait = Y;
 	end,
 });
-Vz:AddToggle("Vz_AddToggle_14", {
-	Title = "Auto Fishing",
-	Description = "",
+Vz:Toggle({
+	Name = "Auto Fishing",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoFishing = Y;
@@ -2683,12 +2743,10 @@ Vz:AddToggle("Vz_AddToggle_14", {
 		end;
 	end,
 });
-local IF = vz:AddSection("Miscellanea / Mastery");
+local IF = vz:Section({ Name = "Miscellanea / Mastery" });
 
-IF:AddSlider("IF_AddSlider_1", {
-	Rounding = 0,
-	Title = "NPC Health % Switch to Weapon",
-	Description = "Switches to fruit moves when NPC HP drops below this percent",
+IF:Slider({
+	Name = "NPC Health % Switch to Weapon",
 	Min = 10,
 	Max = 95,
 	Default = 70,
@@ -2696,17 +2754,15 @@ IF:AddSlider("IF_AddSlider_1", {
 		MasteryHealthPct = Y;
 	end,
 });
-IF:AddToggle("IF_AddToggle_15", {
-	Title = "NPC Aimbot (Mastery)",
-	Description = "Auto-aims fruit skills at the NPC during mastery farming",
+IF:Toggle({
+	Name = "NPC Aimbot (Mastery)",
 	Default = false,
 	Callback = function(Y)
 		MasteryAimbot = Y;
 	end,
 });
-IF:AddToggle("IF_AddToggle_16", {
-	Title = "Double Attack (Fruit M1 + Melee M1)",
-	Description = "Alternates fruit M1 and melee M1 on nearest enemy",
+IF:Toggle({
+	Name = "Double Attack (Fruit M1 + Melee M1)",
 	Default = false,
 	Callback = function(Y)
 		DoubleAttack = Y;
@@ -2741,18 +2797,16 @@ spawn(function()
 	end;
 end);
 local WF = { "Cake", "Bone" };
-IF:AddDropdown("IF_AddDropdown_4", {
-	Title = "Choose Island",
-	Description = "",
-	Values = WF,
+IF:Dropdown({
+	Name = "Choose Island",
+	Items = WF,
 	Default = "Cake",
 	Callback = function(Y)
 		SelectIsland = Y;
 	end,
 });
-IF:AddToggle("IF_AddToggle_17", {
-	Title = "Auto Mastery Fruits",
-	Description = "",
+IF:Toggle({
+	Name = "Auto Mastery Fruits",
 	Default = false,
 	Callback = function(Y)
 		_G.FarmMastery_Dev = Y;
@@ -2806,9 +2860,8 @@ spawn(function()
 		end;
 	end;
 end);
-IF:AddToggle("IF_AddToggle_18", {
-	Title = "Auto Mastery Gun",
-	Description = "",
+IF:Toggle({
+	Name = "Auto Mastery Gun",
 	Default = false,
 	Callback = function(Y)
 		_G.FarmMastery_G = Y;
@@ -2899,9 +2952,8 @@ spawn(function()
 		end;
 	end;
 end);
-IF:AddToggle("IF_AddToggle_19", {
-	Title = "Auto Mastery All Sword",
-	Description = "",
+IF:Toggle({
+	Name = "Auto Mastery All Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.FarmMastery_S = Y;
@@ -2976,11 +3028,10 @@ spawn(function()
 		end);
 	end;
 end);
-local SF = vz:AddSection("Sword Mastery");
-SF:AddDropdown("SF_AddDropdown_5", {
-	Title = "Sword Selection",
-	Description = "Choose which sword to level up",
-	Values = (function()
+local SF = vz:Section({ Name = "Sword Mastery" });
+SF:Dropdown({
+	Name = "Sword Selection",
+	Items = (function()
 		local swords = {};
 		pcall(function()
 			for _, inv in pairs(Q.Remotes.CommF_:InvokeServer("getInventory")) do
@@ -2997,10 +3048,8 @@ SF:AddDropdown("SF_AddDropdown_5", {
 		SelectedSwordName = Y;
 	end,
 });
-SF:AddSlider("SF_AddSlider_2", {
-	Rounding = 0,
-	Title = "Sword Mastery Level Lock",
-	Description = "Stop farming this sword at this mastery level",
+SF:Slider({
+	Name = "Sword Mastery Level Lock",
 	Min = 1,
 	Max = 600,
 	Default = 200,
@@ -3008,9 +3057,8 @@ SF:AddSlider("SF_AddSlider_2", {
 		SwordMasteryLock = Y;
 	end,
 });
-SF:AddToggle("SF_AddToggle_20", {
-	Title = "Auto Switch Sword",
-	Description = "Auto-equips the selected sword and stops at mastery lock level",
+SF:Toggle({
+	Name = "Auto Switch Sword",
 	Default = false,
 	Callback = function(Y)
 		AutoSwitchSword = Y;
@@ -3025,7 +3073,7 @@ spawn(function()
 						local mastery = tonumber(inv.Mastery) or 0;
 						if mastery >= SwordMasteryLock then
 							AutoSwitchSword = false;
-							nz.Notify("Sword Mastery", SelectedSwordName .. " reached level " .. SwordMasteryLock, 5);
+							nz_Notify("Sword Mastery", SelectedSwordName .. " reached level " .. SwordMasteryLock, 5);
 							return;
 						end;
 						if not GetBP(SelectedSwordName) then
@@ -3038,15 +3086,15 @@ spawn(function()
 	end;
 end);
 
-local NF = vz:AddSection("Generals Quests / Items");
-local DF = NF:AddParagraph({ Title = "Cake Princes :", Content = "" });
-local AF = NF:AddParagraph({ Title = " Bones :", Content = "" });
+local NF = vz:Section({ Name = "Generals Quests / Items" });
+local DF = setmetatable({}, {__index={Change=function()end}})
+local AF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		pcall(function()
 			local Y = string.match(Q.Remotes.CommF_:InvokeServer("CakePrinceSpawner"), "%d+");
 			if Y then
-				DF:SetDesc(" Killed : " .. 500 - Y);
+				DF:Change(" Killed : " .. 500 - Y);
 			end;
 		end);
 	end;
@@ -3054,13 +3102,12 @@ end);
 spawn(function()
 	while wait(.2) do
 		pcall(function()
-			AF:SetDesc(" Bones : " .. GetM("Bones"));
+			AF:Change(" Bones : " .. GetM("Bones"));
 		end);
 	end;
 end);
-NF:AddToggle("NF_AddToggle_21", {
-	Title = "Auto Cake Prince",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Cake Prince",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Cake_Prince = Y;
@@ -3131,9 +3178,8 @@ spawn(function()
 		end;
 	end;
 end);
-NF:AddToggle("NF_AddToggle_22", {
-	Title = "Auto Bones",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Bones",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoFarm_Bone = Y;
@@ -3185,17 +3231,15 @@ spawn(function()
 		end;
 	end;
 end);
-NF:AddToggle("NF_AddToggle_23", {
-	Title = "Accept Quests",
-	Description = "",
+NF:Toggle({
+	Name = "Accept Quests",
 	Default = false,
 	Callback = function(Y)
 		_G.AcceptQuestC = Y;
 	end,
 });
-NF:AddToggle("NF_AddToggle_24", {
-	Title = "Auto Farm Mirror",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Farm Mirror",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoMiror = Y;
@@ -3218,9 +3262,8 @@ spawn(function()
 		end;
 	end;
 end);
-NF:AddToggle("NF_AddToggle_25", {
-	Title = "Auto Soul Reaper [Fully]",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Soul Reaper [Fully]",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoHytHallow = Y;
@@ -3254,9 +3297,8 @@ spawn(function()
 		end;
 	end;
 end);
-NF:AddToggle("NF_AddToggle_26", {
-	Title = "Auto Random Bones",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Random Bones",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Random_Bone = Y;
@@ -3274,9 +3316,8 @@ spawn(function()
 		end);
 	end;
 end);
-NF:AddToggle("NF_AddToggle_27", {
-	Title = "Auto Try Luck Gravestone",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Try Luck Gravestone",
 	Default = false,
 	Callback = function(Y)
 		_G.TryLucky = Y;
@@ -3294,9 +3335,8 @@ spawn(function()
 		end;
 	end;
 end);
-NF:AddToggle("NF_AddToggle_28", {
-	Title = "Auto Pray Gravestone",
-	Description = "",
+NF:Toggle({
+	Name = "Auto Pray Gravestone",
 	Default = false,
 	Callback = function(Y)
 		_G.Praying = Y;
@@ -3314,10 +3354,9 @@ spawn(function()
 		end;
 	end;
 end);
-local uF = vz:AddSection("Unlocked Dungeon");
-uF:AddToggle("uF_AddToggle_29", {
-	Title = "Auto Unlock Dough Dungeon",
-	Description = "",
+local uF = vz:Section({ Name = "Unlocked Dungeon" });
+uF:Toggle({
+	Name = "Auto Unlock Dough Dungeon",
 	Default = false,
 	Callback = function(Y)
 		_G.Doughv2 = Y;
@@ -3381,9 +3420,8 @@ spawn(function()
 		end;
 	end;
 end);
-uF:AddToggle("uF_AddToggle_30", {
-	Title = "Auto Unlock Phoenix Dungeon",
-	Description = "",
+uF:Toggle({
+	Name = "Auto Unlock Phoenix Dungeon",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoPhoenixF = Y;
@@ -3416,20 +3454,18 @@ spawn(function()
 		end;
 	end;
 end);
-local BZ = vz:AddSection("Notifications");
-local BossStatusLabel = BZ:AddParagraph({ Title = "Boss Status:", Content = "Checking..." });
-local EliteStatusLabel = BZ:AddParagraph({ Title = "Elite Hunter:", Content = "Checking..." });
-BZ:AddToggle("BZ_AddToggle_31", {
-	Title = "Boss Spawn Notification",
-	Description = "Notifies you when a world boss spawns in this server",
+local BZ = vz:Section({ Name = "Notifications" });
+local BossStatusLabel = setmetatable({}, {__index={Change=function()end}})
+local EliteStatusLabel = setmetatable({}, {__index={Change=function()end}})
+BZ:Toggle({
+	Name = "Boss Spawn Notification",
 	Default = false,
 	Callback = function(Y)
 		BossNotify = Y;
 	end,
 });
-BZ:AddToggle("BZ_AddToggle_32", {
-	Title = "Rare Island Spawn Notification",
-	Description = "Notifies you when Mirage/Kitsune Island spawns",
+BZ:Toggle({
+	Name = "Rare Island Spawn Notification",
 	Default = false,
 	Callback = function(Y)
 		RareIslandNotify = Y;
@@ -3445,21 +3481,21 @@ spawn(function()
 				local bm = GetConnectionEnemies(bname);
 				if bm then foundBoss = bname; break; end;
 			end;
-			BossStatusLabel:SetDesc(foundBoss and ("🟢 " .. foundBoss .. " in server!") or "🔴 No Boss");
+			BossStatusLabel:Change(foundBoss and ("🟢 " .. foundBoss .. " in server!") or "🔴 No Boss");
 			if BossNotify and foundBoss and foundBoss ~= lastBoss then
-				nz.Notify("Boss Spotted!", foundBoss .. " is in the server!", 8);
+				nz_Notify("Boss Spotted!", foundBoss .. " is in the server!", 8);
 			end;
 			lastBoss = foundBoss;
 
 			local eliteHere = workspace.Enemies:FindFirstChild("Elite Hunter");
-			EliteStatusLabel:SetDesc(eliteHere and "🟢 Elite Hunter PRESENT" or "🔴 No Elite Hunter");
+			EliteStatusLabel:Change(eliteHere and "🟢 Elite Hunter PRESENT" or "🔴 No Elite Hunter");
 
 			if RareIslandNotify then
 				local mirage = workspace.Map:FindFirstChild("MirageIsland") or workspace.Map:FindFirstChild("Mirage Island");
 				local kitsune = workspace.Map:FindFirstChild("KitsuneIsland") or workspace.Map:FindFirstChild("Kitsune Island");
 				local rareName = mirage and "Mirage Island" or (kitsune and "Kitsune Island" or nil);
 				if rareName and rareName ~= lastRare then
-					nz.Notify("Rare Island!", rareName .. " has spawned!", 10);
+					nz_Notify("Rare Island!", rareName .. " has spawned!", 10);
 				end;
 				lastRare = rareName;
 			end;
@@ -3467,25 +3503,24 @@ spawn(function()
 	end;
 end);
 
-local gF = vz:AddSection("Buso/Aura Colours");
+local gF = vz:Section({ Name = "Buso/Aura Colours" });
 
-local BusoCurrentLabel = gF:AddParagraph({ Title = "Current Buso Color:", Content = "Loading..." });
-local BusoRarityLabel  = gF:AddParagraph({ Title = "Auto Buso Rarity:", Content = "—" });
+local BusoCurrentLabel = setmetatable({}, {__index={Change=function()end}})
+local BusoRarityLabel  = setmetatable({}, {__index={Change=function()end}});
 spawn(function()
 	while wait(2) do
 		pcall(function()
 			local col = Q.Remotes.CommF_:InvokeServer("GetAuraOwner", d.Name);
-			BusoCurrentLabel:SetDesc(col or "None");
+			BusoCurrentLabel:Change(col or "None");
 		end);
 	end;
 end);
-gF:AddDropdown("gF_AddDropdown_6", {
-	Title = "Auto Buy Buso Color",
-	Description = "Teleport to Barista and buy this Buso color tier",
-	Values = { "Random", "Rare", "Epic", "Legendary" },
+gF:Dropdown({
+	Name = "Auto Buy Buso Color",
+	Items = { "Random", "Rare", "Epic", "Legendary" },
 	Default = "Random",
 	Callback = function(Y)
-		BusoRarityLabel:SetDesc(Y);
+		BusoRarityLabel:Change(Y);
 		pcall(function()
 			for _, npc in pairs(Q.NPCs:GetChildren()) do
 				if npc.Name == "Barista Cousin" then
@@ -3498,9 +3533,8 @@ gF:AddDropdown("gF_AddDropdown_6", {
 		end);
 	end,
 });
-gF:AddToggle("gF_AddToggle_33", {
-	Title = "Auto Teleport Barista Cousin",
-	Description = "",
+gF:Toggle({
+	Name = "Auto Teleport Barista Cousin",
 	Default = false,
 	Callback = function(Y)
 		_G.Tp_MasterA = Y;
@@ -3519,12 +3553,11 @@ spawn(function()
 		end;
 	end;
 end);
-gF:AddButton({ Title = "Buy Buso Colors", Callback = function()
+gF:Button({ Name = "Buy Buso Colors", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("ColorsDealer", "2");
 	end });
-gF:AddToggle("gF_AddToggle_34", {
-	Title = "Auto Rainbow Colors",
-	Description = "",
+gF:Toggle({
+	Name = "Auto Rainbow Colors",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Rainbow_Haki = Y;
@@ -3614,18 +3647,16 @@ spawn(function()
 		end;
 	end);
 end);
-gF:AddToggle("gF_AddToggle_35", {
-	Title = "Accept Rainbow Quest Faster",
-	Description = "",
+gF:Toggle({
+	Name = "Accept Rainbow Quest Faster",
 	Default = false,
 	Callback = function(Y)
 		_G.GetQFast = Y;
 	end,
 });
-local zF = vz:AddSection("Instinct / Observation");
-zF:AddToggle("zF_AddToggle_36", {
-	Title = "Auto Farm Observation",
-	Description = "",
+local zF = vz:Section({ Name = "Instinct / Observation" });
+zF:Toggle({
+	Name = "Auto Farm Observation",
 	Default = false,
 	Callback = function(Y)
 		_G.obsFarm = Y;
@@ -3703,9 +3734,8 @@ spawn(function()
 		end);
 	end;
 end);
-zF:AddToggle("zF_AddToggle_37", {
-	Title = "Auto Observation V2",
-	Description = "",
+zF:Toggle({
+	Name = "Auto Observation V2",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoKenVTWO = Y;
@@ -3803,10 +3833,9 @@ spawn(function()
 		end;
 	end;
 end);
-local iF = vz:AddSection("Upgrade Races V3");
-iF:AddToggle("iF_AddToggle_38", {
-	Title = "Auto Upgrade Mink V3",
-	Description = "",
+local iF = vz:Section({ Name = "Upgrade Races V3" });
+iF:Toggle({
+	Name = "Auto Upgrade Mink V3",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Mink = Y;
@@ -3849,9 +3878,8 @@ spawn(function()
 		end);
 	end;
 end);
-iF:AddToggle("iF_AddToggle_39", {
-	Title = "Auto Upgrade Human V3",
-	Description = "",
+iF:Toggle({
+	Name = "Auto Upgrade Human V3",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Human = Y;
@@ -3918,9 +3946,8 @@ spawn(function()
 		end);
 	end;
 end);
-iF:AddToggle("iF_AddToggle_40", {
-	Title = "Auto Upgrade Skypiea V3",
-	Description = "",
+iF:Toggle({
+	Name = "Auto Upgrade Skypiea V3",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Skypiea = Y;
@@ -3968,9 +3995,8 @@ spawn(function()
 		end);
 	end;
 end);
-iF:AddToggle("iF_AddToggle_41", {
-	Title = "Auto Upgrade FishMan V3",
-	Description = "",
+iF:Toggle({
+	Name = "Auto Upgrade FishMan V3",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Fish = Y;
@@ -4011,10 +4037,9 @@ spawn(function()
 		end);
 	end;
 end);
-local UF = vz:AddSection("Dark Dragger + Valkyrie");
-UF:AddToggle("UF_AddToggle_42", {
-	Title = "Auto Valkyrie",
-	Description = "",
+local UF = vz:Section({ Name = "Dark Dragger + Valkyrie" });
+UF:Toggle({
+	Name = "Auto Valkyrie",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoRipIngay = Y;
@@ -4039,9 +4064,8 @@ spawn(function()
 		end);
 	end;
 end);
-UF:AddToggle("UF_AddToggle_43", {
-	Title = "Auto Unlocked Puzzle",
-	Description = "",
+UF:Toggle({
+	Name = "Auto Unlocked Puzzle",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoUnHaki = Y;
@@ -4085,18 +4109,16 @@ spawn(function()
 		end;
 	end;
 end);
-local CF = mz:AddSection("Settings / Configure");
-CF:AddDropdown("CF_AddDropdown_7", {
-	Title = "Select Weapon",
-	Description = "",
-	Values = {
+local CF = mz:Section({ Name = "Settings / Configure" });
+CF:Dropdown({
+	Name = "Select Weapon",
+	Items = {
 		"Melee",
 		"Sword",
 		"Blox Fruit",
 		"Gun",
 	},
 	Default = "Melee",
-	Multi = false,
 	Callback = function(Y)
 		_G.ChooseWP = Y;
 	end,
@@ -4140,25 +4162,22 @@ spawn(function()
 		end);
 	end;
 end);
-CF:AddToggle("CF_AddToggle_44", {
-	Title = "Initialize Attack [M1/Melee/Sword]",
-	Description = "[ Not Supported Gas M1 ]",
+CF:Toggle({
+	Name = "Initialize Attack [M1/Melee/Sword]",
 	Default = true,
 	Callback = function(Y)
 		_G.Seriality = Y;
 	end,
 });
-CF:AddToggle("CF_AddToggle_45", {
-	Title = "Bring Mobs",
-	Description = "",
+CF:Toggle({
+	Name = "Bring Mobs",
 	Default = true,
 	Callback = function(Y)
 		_B = Y;
 	end,
 });
-CF:AddToggle("CF_AddToggle_46", {
-	Title = "Auto Turn on Buso",
-	Description = "",
+CF:Toggle({
+	Name = "Auto Turn on Buso",
 	Default = true,
 	Callback = function(Y)
 		Boud = Y;
@@ -4176,17 +4195,15 @@ spawn(function()
 		end);
 	end;
 end);
-CF:AddToggle("CF_AddToggle_47", {
-	Title = "Auto Turn on Race V3",
-	Description = "",
+CF:Toggle({
+	Name = "Auto Turn on Race V3",
 	Default = false,
 	Callback = function(Y)
 		_G.RaceClickAutov3 = Y;
 	end,
 });
-CF:AddToggle("CF_AddToggle_48", {
-	Title = "Auto Turn on Race V4",
-	Description = "",
+CF:Toggle({
+	Name = "Auto Turn on Race V4",
 	Default = false,
 	Callback = function(Y)
 		_G.RaceClickAutov4 = Y;
@@ -4217,25 +4234,22 @@ spawn(function()
 		end);
 	end;
 end);
-CF:AddToggle("CF_AddToggle_49", {
-	Title = "Auto Turn on Spin Position",
-	Description = "",
+CF:Toggle({
+	Name = "Auto Turn on Spin Position",
 	Default = false,
 	Callback = function(Y)
 		RandomCFrame = Y;
 	end,
 });
-CF:AddToggle("CF_AddToggle_50", {
-	Title = "Turn on Bypass Teleport",
-	Description = "",
+CF:Toggle({
+	Name = "Turn on Bypass Teleport",
 	Default = false,
 	Callback = function(Y)
 		_G.Bypass = Y;
 	end,
 });
-CF:AddToggle("CF_AddToggle_51", {
-	Title = "Panic Mode",
-	Description = "turn on for safe ur health if low",
+CF:Toggle({
+	Name = "Panic Mode",
 	Default = false,
 	Callback = function(Y)
 		_G.Safemode = Y;
@@ -4256,9 +4270,8 @@ spawn(function()
 		end);
 	end;
 end);
-CF:AddToggle("CF_AddToggle_52", {
-	Title = "Anti AFK",
-	Description = "",
+CF:Toggle({
+	Name = "Anti AFK",
 	Default = true,
 	Callback = function(Y)
 		_G.AntiAFK = Y;
@@ -4269,9 +4282,8 @@ d.Idled:connect(function()
 	wait(1);
 	n:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame);
 end);
-CF:AddToggle("CF_AddToggle_53", {
-	Title = "Remove Hit VFX",
-	Description = "",
+CF:Toggle({
+	Name = "Remove Hit VFX",
 	Default = false,
 	Callback = function(Y)
 		_G.DistroyHit = Y;
@@ -4296,9 +4308,8 @@ spawn(function()
 		end;
 	end;
 end);
-CF:AddToggle("CF_AddToggle_54", {
-	Title = "Remove Death & Respawned VFX",
-	Description = "",
+CF:Toggle({
+	Name = "Remove Death & Respawned VFX",
 	Default = false,
 	Callback = function(Y)
 		RDeath = Y;
@@ -4318,9 +4329,8 @@ spawn(function()
 		end);
 	end;
 end);
-CF:AddToggle("CF_AddToggle_55", {
-	Title = "Disable Notify",
-	Description = "",
+CF:Toggle({
+	Name = "Disable Notify",
 	Default = false,
 	Callback = function(Y)
 		RemoveDamage = Y;
@@ -4339,10 +4349,9 @@ spawn(function()
 		end);
 	end;
 end);
-local vF = mz:AddSection("Stats Upgrade");
-vF:AddSlider("vF_AddSlider_3", {
-	Rounding = 0,
-	Title = "Stats Value",
+local vF = mz:Section({ Name = "Stats Upgrade" });
+vF:Slider({
+	Name = "Stats Value",
 	Min = 0,
 	Max = 1000,
 	Default = 10,
@@ -4350,41 +4359,36 @@ vF:AddSlider("vF_AddSlider_3", {
 	pSats = Y;
 	end,
 });
-vF:AddToggle("vF_AddToggle_56", {
-	Title = "Auto Melee",
-	Description = "",
+vF:Toggle({
+	Name = "Auto Melee",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Melee = Y;
 	end,
 });
-vF:AddToggle("vF_AddToggle_57", {
-	Title = "Auto Swords",
-	Description = "",
+vF:Toggle({
+	Name = "Auto Swords",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Sword = Y;
 	end,
 });
-vF:AddToggle("vF_AddToggle_58", {
-	Title = "Auto Gun",
-	Description = "",
+vF:Toggle({
+	Name = "Auto Gun",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Gun = Y;
 	end,
 });
-vF:AddToggle("vF_AddToggle_59", {
-	Title = "Auto Blox Fruit",
-	Description = "",
+vF:Toggle({
+	Name = "Auto Blox Fruit",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Blox = Y;
 	end,
 });
-vF:AddToggle("vF_AddToggle_60", {
-	Title = "Auto Defense",
-	Description = "",
+vF:Toggle({
+	Name = "Auto Defense",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Defense = Y;
@@ -4435,10 +4439,9 @@ spawn(function()
 		end);
 	end;
 end);
-local mF = yz:AddSection("Fighting Melee Styles");
-mF:AddToggle("mF_AddToggle_61", {
-	Title = "Auto Superhuman",
-	Description = "",
+local mF = yz:Section({ Name = "Fighting Melee Styles" });
+mF:Toggle({
+	Name = "Auto Superhuman",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_SuperHuman = Y;
@@ -4495,9 +4498,8 @@ spawn(function()
 		end);
 	end;
 end);
-mF:AddToggle("mF_AddToggle_62", {
-	Title = "Auto DeathStep",
-	Description = "",
+mF:Toggle({
+	Name = "Auto DeathStep",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoDeathStep = Y;
@@ -4547,9 +4549,8 @@ spawn(function()
 		end;
 	end;
 end);
-mF:AddToggle("mF_AddToggle_63", {
-	Title = "Auto Sharkman Karate",
-	Description = "",
+mF:Toggle({
+	Name = "Auto Sharkman Karate",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_SharkMan_Karate = Y;
@@ -4599,9 +4600,8 @@ spawn(function()
 		end;
 	end;
 end);
-mF:AddToggle("mF_AddToggle_64", {
-	Title = "Auto ElectricClaw",
-	Description = "",
+mF:Toggle({
+	Name = "Auto ElectricClaw",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Electric_Claw = Y;
@@ -4632,9 +4632,8 @@ spawn(function()
 		end;
 	end;
 end);
-mF:AddToggle("mF_AddToggle_65", {
-	Title = "Auto DragonTalon",
-	Description = "",
+mF:Toggle({
+	Name = "Auto DragonTalon",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoDragonTalon = Y;
@@ -4663,9 +4662,8 @@ spawn(function()
 		end;
 	end;
 end);
-mF:AddToggle("mF_AddToggle_66", {
-	Title = "Auto Godhuman",
-	Description = "",
+mF:Toggle({
+	Name = "Auto Godhuman",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_God_Human = Y;
@@ -4714,9 +4712,8 @@ spawn(function()
 		end);
 	end;
 end);
-mF:AddToggle("mF_AddToggle_67", {
-	Title = "Auto SanguineArt",
-	Description = "",
+mF:Toggle({
+	Name = "Auto SanguineArt",
 	Default = false,
 	Callback = function(Y)
 		_G.snaguine = Y;
@@ -4792,18 +4789,17 @@ spawn(function()
 		end;
 	end;
 end);
-local yF = bz:AddSection("Tushita + Yama");
-local bF = yF:AddParagraph({ Title = "Elites Process ", Content = "" });
+local yF = bz:Section({ Name = "Tushita + Yama" });
+local bF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(T) do
 		pcall(function()
-			bF:SetDesc("Elite Procress :  " .. Q.Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
+			bF:Change("Elite Procress :  " .. Q.Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
 		end);
 	end;
 end);
-yF:AddToggle("yF_AddToggle_68", {
-	Title = "Auto Elite Quest",
-	Description = "",
+yF:Toggle({
+	Name = "Auto Elite Quest",
 	Default = false,
 	Callback = function(Y)
 		_G.FarmEliteHunt = Y;
@@ -4836,9 +4832,8 @@ spawn(function()
 		end);
 	end;
 end);
-yF:AddToggle("yF_AddToggle_69", {
-	Title = "Stop when got God\'s Chalice",
-	Description = "",
+yF:Toggle({
+	Name = "Stop when got God\'s Chalice",
 	Default = true,
 	Callback = function(Y)
 		_G.StopWhenChalice = Y;
@@ -4855,9 +4850,8 @@ spawn(function()
 		end;
 	end;
 end);
-yF:AddToggle("yF_AddToggle_70", {
-	Title = "Auto Tushita Sword",
-	Description = "",
+yF:Toggle({
+	Name = "Auto Tushita Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Tushita = Y;
@@ -4916,9 +4910,8 @@ spawn(function()
 		end);
 	end;
 end);
-yF:AddToggle("yF_AddToggle_71", {
-	Title = "Auto Yama Sword",
-	Description = "",
+yF:Toggle({
+	Name = "Auto Yama Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Yama = Y;
@@ -4948,30 +4941,29 @@ spawn(function()
 		end);
 	end;
 end);
-local cF = bz:AddSection("Cursed Dual Katana");
-local HF = cF:AddParagraph({ Title = " Number Cursed dual katana quests ", Content = "Quest Numbers :" });
+local cF = bz:Section({ Name = "Cursed Dual Katana" });
+local HF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		if QuestYama_1 == true then
-			HF:SetDesc(" Quest Numbers : yama quest 1");
+			HF:Change(" Quest Numbers : yama quest 1");
 		elseif QuestYama_2 == true then
-			HF:SetDesc(" Quest Numbers : yama quest 2");
+			HF:Change(" Quest Numbers : yama quest 2");
 		elseif QuestYama_3 == true then
-			HF:SetDesc(" Quest Numbers : yama quest 3");
+			HF:Change(" Quest Numbers : yama quest 3");
 		elseif QuestTushita_1 == true then
-			HF:SetDesc(" Quest Numbers : tushita quest 1");
+			HF:Change(" Quest Numbers : tushita quest 1");
 		elseif QuestTushita_2 == true then
-			HF:SetDesc(" Quest Numbers : tushita quest 2");
+			HF:Change(" Quest Numbers : tushita quest 2");
 		elseif QuestTushita_1 == true then
-			HF:SetDesc(" Quest Numbers: tushita quest 2");
+			HF:Change(" Quest Numbers: tushita quest 2");
 		elseif GetWP("Cursed Dual Katana") then
-			HF:SetDesc(" Quest Numbers: CDK done!!");
+			HF:Change(" Quest Numbers: CDK done!!");
 		end;
 	end;
 end);
-cF:AddToggle("cF_AddToggle_72", {
-	Title = "Auto Get CDK [ Last Quest ]",
-	Description = "",
+cF:Toggle({
+	Name = "Auto Get CDK [ Last Quest ]",
 	Default = false,
 	Callback = function(Y)
 		_G.CDK = Y;
@@ -5004,9 +4996,8 @@ spawn(function()
 		end);
 	end;
 end);
-cF:AddToggle("cF_AddToggle_73", {
-	Title = "Auto Yama CDK",
-	Description = "",
+cF:Toggle({
+	Name = "Auto Yama CDK",
 	Default = false,
 	Callback = function(Y)
 		_G.CDK_YM = Y;
@@ -5185,9 +5176,8 @@ spawn(function()
 		end);
 	end;
 end);
-cF:AddToggle("cF_AddToggle_74", {
-	Title = "Auto Tushita CDK",
-	Description = "",
+cF:Toggle({
+	Name = "Auto Tushita CDK",
 	Default = false,
 	Callback = function(Y)
 		_G.CDK_TS = Y;
@@ -5341,18 +5331,17 @@ spawn(function()
 		end);
 	end;
 end);
-local SF = bz:AddSection("True Triple Katana Sword");
-SF:AddButton({ Title = "Buy Legendary Sword", Callback = function()
+local SF = bz:Section({ Name = "True Triple Katana Sword" });
+SF:Button({ Name = "Buy Legendary Sword", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("LegendarySwordDealer", "1");
 		Q.Remotes.CommF_:InvokeServer("LegendarySwordDealer", "2");
 		Q.Remotes.CommF_:InvokeServer("LegendarySwordDealer", "3");
 	end });
-SF:AddButton({ Title = "Buy True Triple Katana Sword", Callback = function()
+SF:Button({ Name = "Buy True Triple Katana Sword", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("MysteriousMan", "2");
 	end });
-SF:AddToggle("SF_AddToggle_75", {
-	Title = "Tween to Legendary Sword Dealer",
-	Description = "",
+SF:Toggle({
+	Name = "Tween to Legendary Sword Dealer",
 	Default = false,
 	Callback = function(Y)
 		_G.Tp_LgS = Y;
@@ -5371,10 +5360,9 @@ spawn(function()
 		end;
 	end;
 end);
-local oF = bz:AddSection("Pole / God Enal\'s");
-oF:AddToggle("oF_AddToggle_76", {
-	Title = "Auto Pole V1",
-	Description = "",
+local oF = bz:Section({ Name = "Pole / God Enal\'s" });
+oF:Toggle({
+	Name = "Auto Pole V1",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoPole = Y;
@@ -5397,9 +5385,8 @@ spawn(function()
 		end;
 	end;
 end);
-oF:AddToggle("oF_AddToggle_77", {
-	Title = "Auto Pole V2 [Beta]",
-	Description = "",
+oF:Toggle({
+	Name = "Auto Pole V2 [Beta]",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoPoleV2 = Y;
@@ -5445,10 +5432,9 @@ spawn(function()
 		end);
 	end;
 end);
-local ZF = bz:AddSection("Items Law/Order Sword");
-ZF:AddToggle("ZF_AddToggle_78", {
-	Title = "Auto Law Sword",
-	Description = "",
+local ZF = bz:Section({ Name = "Items Law/Order Sword" });
+ZF:Toggle({
+	Name = "Auto Law Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoLawKak = Y;
@@ -5471,16 +5457,15 @@ spawn(function()
 		end;
 	end;
 end);
-ZF:AddButton({ Title = "Buy Microchip Law", Callback = function()
+ZF:Button({ Name = "Buy Microchip Law", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BlackbeardReward", "Microchip", "2");
 	end });
-ZF:AddButton({ Title = "Start Law Raids", Callback = function()
+ZF:Button({ Name = "Start Law Raids", Callback = function()
 		fireclickdetector(workspace.Map.CircleIsland.RaidSummon.Button.Main.ClickDetector);
 	end });
-local TF = bz:AddSection("East Blue Misc");
-TF:AddToggle("TF_AddToggle_79", {
-	Title = "Auto Saw Sword",
-	Description = "",
+local TF = bz:Section({ Name = "East Blue Misc" });
+TF:Toggle({
+	Name = "Auto Saw Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoSaw = Y;
@@ -5503,9 +5488,8 @@ spawn(function()
 		end);
 	end;
 end);
-TF:AddToggle("TF_AddToggle_80", {
-	Title = "Auto Saber Sword",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Saber Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoSaber = Y;
@@ -5596,9 +5580,8 @@ spawn(function()
 		end);
 	end;
 end);
-TF:AddToggle("TF_AddToggle_81", {
-	Title = "Auto Cybrog",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Cybrog",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoColShad = Y;
@@ -5621,9 +5604,8 @@ spawn(function()
 		end;
 	end;
 end);
-TF:AddToggle("TF_AddToggle_82", {
-	Title = "Auto Usoap\'s Hat",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Usoap\'s Hat",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoGetUsoap = Y;
@@ -5648,9 +5630,8 @@ spawn(function()
 		end);
 	end;
 end);
-TF:AddToggle("TF_AddToggle_83", {
-	Title = "Auto Bisento V2",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Bisento V2",
 	Default = false,
 	Callback = function(Y)
 		_G.Greybeard = Y;
@@ -5678,9 +5659,8 @@ spawn(function()
 		end;
 	end;
 end);
-TF:AddToggle("TF_AddToggle_84", {
-	Title = "Auto Warden Sword",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Warden Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.WardenBoss = Y;
@@ -5703,9 +5683,8 @@ spawn(function()
 		end;
 	end;
 end);
-TF:AddToggle("TF_AddToggle_85", {
-	Title = "Auto Marine Coat",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Marine Coat",
 	Default = false,
 	Callback = function(Y)
 		_G.MarinesCoat = Y;
@@ -5728,9 +5707,8 @@ spawn(function()
 		end;
 	end;
 end);
-TF:AddToggle("TF_AddToggle_86", {
-	Title = "Auto Swan Coat",
-	Description = "",
+TF:Toggle({
+	Name = "Auto Swan Coat",
 	Default = false,
 	Callback = function(Y)
 		_G.SwanCoat = Y;
@@ -5753,10 +5731,9 @@ spawn(function()
 		end;
 	end;
 end);
-local kF = bz:AddSection("Rengoku Sword");
-kF:AddToggle("kF_AddToggle_87", {
-	Title = "Auto Rengoku Sword",
-	Description = "",
+local kF = bz:Section({ Name = "Rengoku Sword" });
+kF:Toggle({
+	Name = "Auto Rengoku Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.IceBossRen = Y;
@@ -5779,9 +5756,8 @@ spawn(function()
 		end;
 	end);
 end);
-kF:AddToggle("kF_AddToggle_88", {
-	Title = "Auto Key Rengoku",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Key Rengoku",
 	Default = false,
 	Callback = function(Y)
 		_G.KeysRen = Y;
@@ -5810,9 +5786,8 @@ spawn(function()
 		end);
 	end;
 end);
-kF:AddToggle("kF_AddToggle_89", {
-	Title = "Auto Dragon Trident",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Dragon Trident",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoTridentW2 = Y;
@@ -5835,9 +5810,8 @@ spawn(function()
 		end);
 	end;
 end);
-kF:AddToggle("kF_AddToggle_90", {
-	Title = "Auto Long Sword",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Long Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.LongsWord = Y;
@@ -5860,9 +5834,8 @@ spawn(function()
 		end);
 	end;
 end);
-kF:AddToggle("kF_AddToggle_91", {
-	Title = "Auto Black Spikey",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Black Spikey",
 	Default = false,
 	Callback = function(Y)
 		_G.BlackSpikey = Y;
@@ -5885,9 +5858,8 @@ spawn(function()
 		end;
 	end;
 end);
-kF:AddToggle("kF_AddToggle_92", {
-	Title = "Auto Dark Blade V3",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Dark Blade V3",
 	Default = false,
 	Callback = function(Y)
 		_G.DarkBladev3 = Y;
@@ -5917,9 +5889,8 @@ spawn(function()
 		end);
 	end;
 end);
-kF:AddToggle("kF_AddToggle_93", {
-	Title = "Auto Midnight Blade",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Midnight Blade",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoEcBoss = Y;
@@ -5948,9 +5919,8 @@ spawn(function()
 		end);
 	end;
 end);
-kF:AddToggle("kF_AddToggle_94", {
-	Title = "Auto Darkbeard",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Darkbeard",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Def_DarkCoat = Y;
@@ -5981,9 +5951,8 @@ spawn(function()
 		end;
 	end;
 end);
-kF:AddToggle("kF_AddToggle_95", {
-	Title = "Auto Unlocked DonSwan",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Unlocked DonSwan",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_DonAcces = Y;
@@ -6032,9 +6001,8 @@ spawn(function()
 		end;
 	end;
 end);
-kF:AddToggle("kF_AddToggle_96", {
-	Title = "Auto Swan Glasses",
-	Description = "",
+kF:Toggle({
+	Name = "Auto Swan Glasses",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_SwanGG = Y;
@@ -6057,10 +6025,9 @@ spawn(function()
 		end;
 	end;
 end);
-local LF = bz:AddSection("Cavender + Twin Hooks + Bigmom");
-LF:AddToggle("LF_AddToggle_97", {
-	Title = "Auto Bigmom",
-	Description = "",
+local LF = bz:Section({ Name = "Cavender + Twin Hooks + Bigmom" });
+LF:Toggle({
+	Name = "Auto Bigmom",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoBigmom = Y;
@@ -6083,9 +6050,8 @@ spawn(function()
 		end;
 	end;
 end);
-LF:AddToggle("LF_AddToggle_98", {
-	Title = "Auto Canvendish Sword",
-	Description = "",
+LF:Toggle({
+	Name = "Auto Canvendish Sword",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Cavender = Y;
@@ -6108,9 +6074,8 @@ spawn(function()
 		end);
 	end;
 end);
-LF:AddToggle("LF_AddToggle_99", {
-	Title = "Auto Twin Hooks",
-	Description = "",
+LF:Toggle({
+	Name = "Auto Twin Hooks",
 	Default = false,
 	Callback = function(Y)
 		_G.TwinHook = Y;
@@ -6135,9 +6100,8 @@ spawn(function()
 		end);
 	end;
 end);
-LF:AddToggle("LF_AddToggle_100", {
-	Title = "Auto Serpent Bow",
-	Description = "",
+LF:Toggle({
+	Name = "Auto Serpent Bow",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoSerpentBow = Y;
@@ -6158,9 +6122,8 @@ spawn(function()
 		end;
 	end;
 end);
-LF:AddToggle("LF_AddToggle_101", {
-	Title = "Auto Lei Accessory",
-	Description = "",
+LF:Toggle({
+	Name = "Auto Lei Accessory",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoKilo = Y;
@@ -6183,7 +6146,7 @@ spawn(function()
 		end;
 	end;
 end);
-local PF = cz:AddSection("Sea Event / Setting Sail");
+local PF = cz:Section({ Name = "Sea Event / Setting Sail" });
 local jF = {
 		"Guardian",
 		"PirateGrandBrigade",
@@ -6203,38 +6166,37 @@ local GF = {
 		"Lv 6",
 		"Lv Infinite",
 	};
-local qF = PF:AddParagraph({ Title = " Spy Status ", Content = "" });
+local qF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		pcall(function()
 			local Y = string.match(Q.Remotes.CommF_:InvokeServer("InfoLeviathan", "1"), "%d+");
 			if Y then
-				qF:SetDesc(" Spy Leviathan  : " .. tostring(Y));
+				qF:Change(" Spy Leviathan  : " .. tostring(Y));
 				if tostring(Y) == 5 then
-					qF:SetDesc(" Spy Leviathan : Already Done!!");
+					qF:Change(" Spy Leviathan : Already Done!!");
 				end;
 			end;
 		end);
 	end;
 end);
-PF:AddButton({ Title = "Buy Fracments with Spy", Callback = function()
+PF:Button({ Name = "Buy Fracments with Spy", Callback = function()
 		((Q:WaitForChild("Remotes")):WaitForChild("CommF_")):InvokeServer("InfoLeviathan", "2");
 	end });
-local VF = PF:AddParagraph({ Title = " FlozenDimension Status ", Content = "" });
+local VF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	pcall(function()
 		while wait(.2) do
 			if workspace._WorldOrigin.Locations:FindFirstChild("Frozen Dimension") then
-				VF:SetDesc(" Flozen Dimension : True");
+				VF:Change(" Flozen Dimension : True");
 			else
-				VF:SetDesc(" Flozen Dimension : False");
+				VF:Change(" Flozen Dimension : False");
 			end;
 		end;
 	end);
 end);
-PF:AddToggle("PF_AddToggle_102", {
-	Title = "Auto Teleport Frozen Dimension",
-	Description = "turn on for teleport to frozen dimension and start the leviathan gate",
+PF:Toggle({
+	Name = "Auto Teleport Frozen Dimension",
 	Default = false,
 	Callback = function(Y)
 		_G.FrozenTP = Y;
@@ -6252,9 +6214,8 @@ spawn(function()
 		end;
 	end;
 end);
-PF:AddToggle("PF_AddToggle_103", {
-	Title = "Auto Drive To Hydra Island",
-	Description = "",
+PF:Toggle({
+	Name = "Auto Drive To Hydra Island",
 	Default = false,
 	Callback = function(Y)
 		_G.SailBoat_Hydra = Y;
@@ -6291,32 +6252,27 @@ spawn(function()
 		end;
 	end;
 end);
-PF:AddDropdown("PF_AddDropdown_8", {
-	Title = "Choose Boats",
-	Description = "",
-	Values = jF,
+PF:Dropdown({
+	Name = "Choose Boats",
+	Items = jF,
 	Default = "Guardian",
-	Multi = false,
 	Callback = function(Y)
 		_G.SelectedBoat = Y;
 	end,
 });
-PF:AddButton({ Title = "Buy Boats", Callback = function()
+PF:Button({ Name = "Buy Boats", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyBoat", _G.SelectedBoat);
 	end });
-PF:AddDropdown("PF_AddDropdown_9", {
-	Title = "Choose Sea Level",
-	Description = "",
-	Values = GF,
+PF:Dropdown({
+	Name = "Choose Sea Level",
+	Items = GF,
 	Default = "Lv 1",
-	Multi = false,
 	Callback = function(Y)
 		_G.DangerSc = Y;
 	end,
 });
-PF:AddToggle("PF_AddToggle_104", {
-	Title = "Auto Sail Boat",
-	Description = "",
+PF:Toggle({
+	Name = "Auto Sail Boat",
 	Default = false,
 	Callback = function(Y)
 		_G.SailBoats = Y;
@@ -6385,74 +6341,65 @@ spawn(function()
 		end);
 	end;
 end);
-local tF = cz:AddSection("Entity Sea Event");
-tF:AddToggle("tF_AddToggle_105", {
-	Title = "Auto Shark",
-	Description = "",
+local tF = cz:Section({ Name = "Entity Sea Event" });
+tF:Toggle({
+	Name = "Auto Shark",
 	Default = false,
 	Callback = function(Y)
 		_G.Shark = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_106", {
-	Title = "Auto Piranha",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Piranha",
 	Default = false,
 	Callback = function(Y)
 		_G.Piranha = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_107", {
-	Title = "Auto Terror Shark",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Terror Shark",
 	Default = false,
 	Callback = function(Y)
 		_G.TerrorShark = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_108", {
-	Title = "Auto Fish Crew Member",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Fish Crew Member",
 	Default = false,
 	Callback = function(Y)
 		_G.MobCrew = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_109", {
-	Title = "Auto Haunted Crew Member",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Haunted Crew Member",
 	Default = false,
 	Callback = function(Y)
 		_G.HCM = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_110", {
-	Title = "Auto Attack PirateGrandBrigade",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Attack PirateGrandBrigade",
 	Default = false,
 	Callback = function(Y)
 		_G.PGB = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_111", {
-	Title = "Auto Attack Fish Boat",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Attack Fish Boat",
 	Default = false,
 	Callback = function(Y)
 		_G.FishBoat = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_112", {
-	Title = "Auto Attack Sea Beast",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Attack Sea Beast",
 	Default = false,
 	Callback = function(Y)
 		_G.SeaBeast1 = Y;
 	end,
 });
-tF:AddToggle("tF_AddToggle_113", {
-	Title = "Auto Attack Leviathan",
-	Description = "",
+tF:Toggle({
+	Name = "Auto Attack Leviathan",
 	Default = false,
 	Callback = function(Y)
 		_G.Leviathan1 = Y;
@@ -6696,20 +6643,19 @@ spawn(function()
 		end);
 	end;
 end);
-local XF = cz:AddSection("Kitsune Island / Event");
-local hF = XF:AddParagraph({ Title = " Kitsune Island Status ", Content = "" });
+local XF = cz:Section({ Name = "Kitsune Island / Event" });
+local hF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		if workspace.Map:FindFirstChild("KitsuneIsland") or workspace._WorldOrigin.Locations:FindFirstChild("Kitsune Island") then
-			hF:SetDesc(" Kitsune Island : True");
+			hF:Change(" Kitsune Island : True");
 		else
-			hF:SetDesc(" Kitsune Island : False");
+			hF:Change(" Kitsune Island : False");
 		end;
 	end;
 end);
-XF:AddToggle("XF_AddToggle_114", {
-	Title = "Auto Find Kitsune Island",
-	Description = "turn on for finding & tween kitsune island",
+XF:Toggle({
+	Name = "Auto Find Kitsune Island",
 	Default = false,
 	Callback = function(Y)
 		_G.AutofindKitIs = Y;
@@ -6751,9 +6697,8 @@ spawn(function()
 		end;
 	end;
 end);
-XF:AddToggle("XF_AddToggle_115", {
-	Title = "Auto Teleport to Shrine Actived",
-	Description = "",
+XF:Toggle({
+	Name = "Auto Teleport to Shrine Actived",
 	Default = false,
 	Callback = function(Y)
 		_G.tweenShrine = Y;
@@ -6782,9 +6727,8 @@ spawn(function()
 		end;
 	end;
 end);
-XF:AddToggle("XF_AddToggle_116", {
-	Title = "Auto Collect Azure Ember",
-	Description = "",
+XF:Toggle({
+	Name = "Auto Collect Azure Ember",
 	Default = false,
 	Callback = function(Y)
 		_G.Collect_Ember = Y;
@@ -6804,9 +6748,8 @@ spawn(function()
 		end;
 	end;
 end);
-XF:AddToggle("XF_AddToggle_117", {
-	Title = "Auto Trade Azure Ember",
-	Description = "",
+XF:Toggle({
+	Name = "Auto Trade Azure Ember",
 	Default = false,
 	Callback = function(Y)
 		_G.Trade_Ember = Y;
@@ -6823,21 +6766,21 @@ spawn(function()
 		end;
 	end;
 end);
-XF:AddButton({ Title = "Trade Items Azure", Callback = function()
+XF:Button({ Name = "Trade Items Azure", Callback = function()
 		(Q.Modules.Net:FindFirstChild("RF/KitsuneStatuePray")):InvokeServer();
 	end });
-XF:AddButton({ Title = "Talk with kitsune statue", Callback = function()
+XF:Button({ Name = "Talk with kitsune statue", Callback = function()
 		(Q.Modules.Net:FindFirstChild("RE/TouchKitsuneStatue")):FireServer();
 	end });
-local BF = Hz:AddSection("Mystic Island / Full Moon");
-FullMOOn = BF:AddParagraph({ Title = " FullMoon Status ", Content = "" });
-Ismirage = BF:AddParagraph({ Title = " Mirage Island Status ", Content = "" });
+local BF = Hz:Section({ Name = "Mystic Island / Full Moon" });
+FullMOOn = setmetatable({}, {__index={Change=function()end}})
+Ismirage = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		if workspace.Map:FindFirstChild("MysticIsland") or workspace._WorldOrigin.Locations:FindFirstChild("Mirage Island") then
-			Ismirage:SetDesc(" Mirage Island : True");
+			Ismirage:Change(" Mirage Island : True");
 		else
-			Ismirage:SetDesc(" Mirage Island : False");
+			Ismirage:Change(" Mirage Island : False");
 		end;
 	end;
 end);
@@ -6854,28 +6797,27 @@ spawn(function()
 			moon1 = "http://www.roblox.com/asset/?id=9709135895";
 			moon = Getmoon();
 			if moon == moon1 then
-				FullMOOn:SetDesc("Moon : 0 / 8");
+				FullMOOn:Change("Moon : 0 / 8");
 			elseif moon == moon2 then
-				FullMOOn:SetDesc("Moon : 1 / 8");
+				FullMOOn:Change("Moon : 1 / 8");
 			elseif moon == moon3 then
-				FullMOOn:SetDesc("Moon : 2 / 8");
+				FullMOOn:Change("Moon : 2 / 8");
 			elseif moon == moon4 then
-				FullMOOn:SetDesc("Moon : 3 / 8 [ Next Night ]");
+				FullMOOn:Change("Moon : 3 / 8 [ Next Night ]");
 			elseif moon == moon5 then
-				FullMOOn:SetDesc("Moon : 4 / 8 [ Full Moon ]");
+				FullMOOn:Change("Moon : 4 / 8 [ Full Moon ]");
 			elseif moon == moon6 then
-				FullMOOn:SetDesc("Moon : 5 / 8 [ Last Night ]");
+				FullMOOn:Change("Moon : 5 / 8 [ Last Night ]");
 			elseif moon == moon7 then
-				FullMOOn:SetDesc("Moon : 6 / 8");
+				FullMOOn:Change("Moon : 6 / 8");
 			elseif moon == moon8 then
-				FullMOOn:SetDesc("Moon : 7 / 8");
+				FullMOOn:Change("Moon : 7 / 8");
 			end;
 		end);
 	end;
 end);
-BF:AddToggle("BF_AddToggle_118", {
-	Title = "Auto Find Mirage Island",
-	Description = "turn on for finding & tween mirage island",
+BF:Toggle({
+	Name = "Auto Find Mirage Island",
 	Default = false,
 	Callback = function(Y)
 		_G.FindMirage = Y;
@@ -6917,9 +6859,8 @@ spawn(function()
 		end;
 	end;
 end);
-BF:AddToggle("BF_AddToggle_119", {
-	Title = "Auto Tween To Highest Point",
-	Description = "",
+BF:Toggle({
+	Name = "Auto Tween To Highest Point",
 	Default = false,
 	Callback = function(Y)
 		_G.HighestMirage = Y;
@@ -6936,9 +6877,8 @@ spawn(function()
 		end;
 	end;
 end);
-BF:AddToggle("BF_AddToggle_120", {
-	Title = "Auto Collect Gear",
-	Description = "",
+BF:Toggle({
+	Name = "Auto Collect Gear",
 	Default = false,
 	Callback = function(Y)
 		_G.TPGEAR = Y;
@@ -6957,9 +6897,8 @@ spawn(function()
 		end;
 	end);
 end);
-BF:AddToggle("BF_AddToggle_121", {
-	Title = "Change Transparency can see",
-	Description = "",
+BF:Toggle({
+	Name = "Change Transparency can see",
 	Default = false,
 	Callback = function(Y)
 		_G.can = Y;
@@ -6982,9 +6921,8 @@ spawn(function()
 		end;
 	end);
 end);
-BF:AddToggle("BF_AddToggle_122", {
-	Title = "Auto Tween Advanced Fruit Dealer",
-	Description = "",
+BF:Toggle({
+	Name = "Auto Tween Advanced Fruit Dealer",
 	Default = false,
 	Callback = function(Y)
 		_G.Addealer = Y;
@@ -7003,9 +6941,8 @@ spawn(function()
 		end;
 	end;
 end);
-BF:AddToggle("BF_AddToggle_123", {
-	Title = "Auto Collect Mirage Chest",
-	Description = "",
+BF:Toggle({
+	Name = "Auto Collect Mirage Chest",
 	Default = false,
 	Callback = function(Y)
 		_G.FarmChestM = Y;
@@ -7044,30 +6981,29 @@ spawn(function()
 		end;
 	end;
 end);
-local lF = Hz:AddSection("Skull Guitars / Misc");
-local pF = lF:AddParagraph({ Title = " Skull Guitar Quests ", Content = "" });
+local lF = Hz:Section({ Name = "Skull Guitars / Misc" });
+local pF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		pcall(function()
 			if Quest1 == true then
-				pF:SetDesc(" Quest Number : Quest1");
+				pF:Change(" Quest Number : Quest1");
 			elseif Quest2 == true then
-				pF:SetDesc(" Quest Number : Quest2");
+				pF:Change(" Quest Number : Quest2");
 			elseif Quest3 == true then
-				pF:SetDesc(" Quest Number : Quest3");
+				pF:Change(" Quest Number : Quest3");
 			elseif Quest4 == true then
-				pF:SetDesc(" Quest Number : Quest4");
+				pF:Change(" Quest Number : Quest4");
 			elseif GetWP("Skull Guitar") then
-				pF:SetDesc(" Quest Number : Collect!!");
+				pF:Change(" Quest Number : Collect!!");
 			else
-				pF:SetDesc(" Quest Number : No Quest!!");
+				pF:Change(" Quest Number : No Quest!!");
 			end;
 		end);
 	end;
 end);
-lF:AddToggle("lF_AddToggle_124", {
-	Title = "Auto Skull Guitar",
-	Description = "",
+lF:Toggle({
+	Name = "Auto Skull Guitar",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Soul_Guitar = Y;
@@ -7258,9 +7194,8 @@ spawn(function()
 		end);
 	end;
 end);
-lF:AddToggle("lF_AddToggle_125", {
-	Title = "Auto Farm Material Skull Guitar",
-	Description = "",
+lF:Toggle({
+	Name = "Auto Farm Material Skull Guitar",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoMatSoul = Y;
@@ -7337,15 +7272,14 @@ spawn(function()
 		end);
 	end;
 end);
-lF:AddButton({ Title = "Talk With Stone", Callback = function()
+lF:Button({ Name = "Talk With Stone", Callback = function()
 		((Q:WaitForChild("Remotes")):WaitForChild("CommF_")):InvokeServer("RaceV4Progress", "Begin");
 		((Q:WaitForChild("Remotes")):WaitForChild("CommF_")):InvokeServer("RaceV4Progress", "Check");
 		((Q:WaitForChild("Remotes")):WaitForChild("CommF_")):InvokeServer("RaceV4Progress", "Teleport");
 		((Q:WaitForChild("Remotes")):WaitForChild("CommF_")):InvokeServer("RaceV4Progress", "Continue");
 	end });
-lF:AddToggle("lF_AddToggle_126", {
-	Title = "Auto Look At Moon",
-	Description = "",
+lF:Toggle({
+	Name = "Auto Look At Moon",
 	Default = false,
 	Callback = function(Y)
 		LookM = Y;
@@ -7364,18 +7298,17 @@ task.spawn(function()
 		end;
 	end;
 end);
-local EF = Hz:AddSection("Trials Quests / Misc V4");
-local eF = EF:AddParagraph({ Title = " Tiers V4 Status ", Content = "" });
+local EF = Hz:Section({ Name = "Trials Quests / Misc V4" });
+local eF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	pcall(function()
 		while wait(.2) do
-			eF:SetDesc(" Tiers - V4  :" .. (" " .. d.Data.Race.C.Value));
+			eF:Change(" Tiers - V4  :" .. (" " .. d.Data.Race.C.Value));
 		end;
 	end);
 end);
-EF:AddToggle("EF_AddToggle_127", {
-	Title = "Auto Pull Lever",
-	Description = "",
+EF:Toggle({
+	Name = "Auto Pull Lever",
 	Default = false,
 	Callback = function(Y)
 		_G.Lver = Y;
@@ -7394,9 +7327,8 @@ spawn(function()
 		end;
 	end;
 end);
-EF:AddToggle("EF_AddToggle_128", {
-	Title = "Auto Train V4",
-	Description = "turn on for farm tier + auto upgrade your tier level",
+EF:Toggle({
+	Name = "Auto Train V4",
 	Default = false,
 	Callback = function(Y)
 		_G.AcientOne = Y;
@@ -7433,7 +7365,7 @@ spawn(function()
 		end);
 	end;
 end);
-EF:AddButton({ Title = "Teleport to Temple of Time", Callback = function()
+EF:Button({ Name = "Teleport to Temple of Time", Callback = function()
 		TpTemple();
 	end });
 function TpTemple()
@@ -7443,17 +7375,16 @@ function TpTemple()
 		Y.Parent = workspace:WaitForChild("Map");
 	end;
 end;
-EF:AddButton({ Title = "Teleport to Ancient One", Callback = function()
+EF:Button({ Name = "Teleport to Ancient One", Callback = function()
 		TpTemple();
 		notween(CFrame.new(28981.552734375, 14888.426757812, -120.24584960938));
 	end });
-EF:AddButton({ Title = "Teleport to Ancient Clock", Callback = function()
+EF:Button({ Name = "Teleport to Ancient Clock", Callback = function()
 		TpTemple();
 		notween(CFrame.new(29549, 15069, -88));
 	end });
-EF:AddToggle("EF_AddToggle_129", {
-	Title = "Auto Teleport to Race Doors",
-	Description = "",
+EF:Toggle({
+	Name = "Auto Teleport to Race Doors",
 	Default = false,
 	Callback = function(Y)
 		_G.TPDoor = Y;
@@ -7480,9 +7411,8 @@ spawn(function()
 		end);
 	end;
 end);
-EF:AddToggle("EF_AddToggle_130", {
-	Title = "Auto Complete Trial Race",
-	Description = "",
+EF:Toggle({
+	Name = "Auto Complete Trial Race",
 	Default = false,
 	Callback = function(Y)
 		_G.Complete_Trials = Y;
@@ -7588,9 +7518,8 @@ spawn(function()
 		end);
 	end;
 end);
-EF:AddToggle("EF_AddToggle_131", {
-	Title = "Auto Kill Player After Trial",
-	Description = "turn on for kill player after the race trials",
+EF:Toggle({
+	Name = "Auto Kill Player After Trial",
 	Default = false,
 	Callback = function(Y)
 		_G.Defeating = Y;
@@ -7616,10 +7545,9 @@ spawn(function()
 		end);
 	end;
 end);
-local OF = Sz:AddSection("Dojo Quest & Drago Race");
-OF:AddToggle("OF_AddToggle_132", {
-	Title = "Auto Dojo Trainer",
-	Description = "turn on for do dojo belt quest white to black",
+local OF = Sz:Section({ Name = "Dojo Quest & Drago Race" });
+OF:Toggle({
+	Name = "Auto Dojo Trainer",
 	Default = false,
 	Callback = function(Y)
 		_G.Dojoo = Y;
@@ -7721,9 +7649,8 @@ spawn(function()
 		end;
 	end;
 end);
-OF:AddToggle("OF_AddToggle_133", {
-	Title = "Auto Dragon Hunter",
-	Description = "turn on for farm blaze ember + auto collect blaze ember",
+OF:Toggle({
+	Name = "Auto Dragon Hunter",
 	Default = false,
 	Callback = function(Y)
 		_G.FarmBlazeEM = Y;
@@ -7848,14 +7775,13 @@ spawn(function()
 		end;
 	end;
 end);
-local fF = Sz:AddSection("Drago Trial");
+local fF = Sz:Section({ Name = "Drago Trial" });
 GetQuestDracoLevel = function()
 		local Y = { [1] = { NPC = "Dragon Wizard", Command = "Upgrade" } };
 		return (Q.Modules.Net:FindFirstChild("RF/InteractDragonQuest")):InvokeServer(unpack(Y));
 	end;
-fF:AddToggle("fF_AddToggle_134", {
-	Title = "Tween To Upgrade Droco Trial",
-	Description = "",
+fF:Toggle({
+	Name = "Tween To Upgrade Droco Trial",
 	Default = false,
 	Callback = function(Y)
 		_G.UPGDrago = Y;
@@ -7880,9 +7806,8 @@ spawn(function()
 		end);
 	end;
 end);
-fF:AddToggle("fF_AddToggle_135", {
-	Title = "Auto Drago (V1)",
-	Description = "turn on for auto quest1 auto prehistoric event + collect dragon eggs",
+fF:Toggle({
+	Name = "Auto Drago (V1)",
 	Default = false,
 	Callback = function(Y)
 		_G.DragoV1 = Y;
@@ -7907,9 +7832,8 @@ spawn(function()
 		end);
 	end;
 end);
-fF:AddToggle("fF_AddToggle_136", {
-	Title = "Auto Drago (V2)",
-	Description = "turn on for auto kill Forest Pirate & Collect fireflower",
+fF:Toggle({
+	Name = "Auto Drago (V2)",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoFireFlowers = Y;
@@ -7947,9 +7871,8 @@ spawn(function()
 		end;
 	end;
 end);
-fF:AddToggle("fF_AddToggle_137", {
-	Title = "Auto Drago (V3)",
-	Description = "turn on for sea event kill terror shark",
+fF:Toggle({
+	Name = "Auto Drago (V3)",
 	Default = false,
 	Callback = function(Y)
 		_G.DragoV3 = Y;
@@ -7972,9 +7895,8 @@ spawn(function()
 		end);
 	end;
 end);
-fF:AddToggle("fF_AddToggle_138", {
-	Title = "Auto Relic Drago Trial [Beta]",
-	Description = "turn on for auto trial v4 you have to COLLECT RELIC by your self",
+fF:Toggle({
+	Name = "Auto Relic Drago Trial [Beta]",
 	Default = false,
 	Callback = function(Y)
 		_G.Relic123 = Y;
@@ -8023,9 +7945,8 @@ spawn(function()
 		end;
 	end;
 end);
-fF:AddToggle("fF_AddToggle_139", {
-	Title = "Auto Train Drago v4",
-	Description = "turn on for training Drago race v4 + auto upgrade tier",
+fF:Toggle({
+	Name = "Auto Train Drago v4",
 	Default = false,
 	Callback = function(Y)
 		_G.TrainDrago = Y;
@@ -8057,9 +7978,8 @@ spawn(function()
 		end);
 	end;
 end);
-fF:AddToggle("fF_AddToggle_140", {
-	Title = "Tween to Drago Trials",
-	Description = "",
+fF:Toggle({
+	Name = "Tween to Drago Trials",
 	Default = false,
 	Callback = function(Y)
 		_G.TpDrago_Prehis = Y;
@@ -8075,9 +7995,8 @@ spawn(function()
 		end;
 	end;
 end);
-fF:AddToggle("fF_AddToggle_141", {
-	Title = "Swap Drago Race",
-	Description = "",
+fF:Toggle({
+	Name = "Swap Drago Race",
 	Default = false,
 	Callback = function(Y)
 		_G.BuyDrago = Y;
@@ -8098,9 +8017,8 @@ spawn(function()
 		end;
 	end;
 end);
-fF:AddToggle("fF_AddToggle_142", {
-	Title = "Upgrade Dragon Talon With Uzoth",
-	Description = "",
+fF:Toggle({
+	Name = "Upgrade Dragon Talon With Uzoth",
 	Default = false,
 	Callback = function(Y)
 		_G.DT_Uzoth = Y;
@@ -8118,16 +8036,15 @@ spawn(function()
 		end;
 	end;
 end);
-local sF = oz:AddSection("Volcanic Magnet");
-sF:AddToggle("sF_AddToggle_143", {
-	Title = "Auto Craft Volcanic Magnet",
-	Description = "turn on for auto farm material and craft volcanic magnet & stop when you have 1 volcanic magnet",
+local sF = oz:Section({ Name = "Volcanic Magnet" });
+sF:Toggle({
+	Name = "Auto Craft Volcanic Magnet",
 	Default = false,
 	Callback = function(Y)
 		_G.CraftVM = Y;
 	end,
 });
-sF:AddButton({ Title = "Craft Volcanic Magnet", Callback = function()
+sF:Button({ Name = "Craft Volcanic Magnet", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "Volcanic Magnet");
 	end });
 spawn(function()
@@ -8159,20 +8076,19 @@ spawn(function()
 		end);
 	end;
 end);
-local xF = oz:AddSection("Prehistoric Island");
-local JF = xF:AddParagraph({ Title = " Prehistoric Island Status ", Content = "" });
+local xF = oz:Section({ Name = "Prehistoric Island" });
+local JF = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		if workspace.Map:FindFirstChild("PrehistoricIsland") or workspace._WorldOrigin.Locations:FindFirstChild("Prehistoric Island") then
-			JF:SetDesc(" Prehistoric Island : True");
+			JF:Change(" Prehistoric Island : True");
 		else
-			JF:SetDesc(" Prehistoric Island : False");
+			JF:Change(" Prehistoric Island : False");
 		end;
 	end;
 end);
-xF:AddToggle("xF_AddToggle_144", {
-	Title = "Auto Find Prehistoric Island",
-	Description = "turn on for finding & tween & start prehistoric island",
+xF:Toggle({
+	Name = "Auto Find Prehistoric Island",
 	Default = false,
 	Callback = function(Y)
 		_G.Prehis_Find = Y;
@@ -8228,9 +8144,8 @@ spawn(function()
 		end;
 	end;
 end);
-xF:AddToggle("xF_AddToggle_145", {
-	Title = "Auto Patch Prehistoric Event",
-	Description = "turn on for auto patch volcano + kill aura lava golems + auto remove lava",
+xF:Toggle({
+	Name = "Auto Patch Prehistoric Event",
 	Default = false,
 	Callback = function(Y)
 		_G.Prehis_Skills = Y;
@@ -8310,9 +8225,8 @@ spawn(function()
 		end);
 	end;
 end);
-xF:AddToggle("xF_AddToggle_146", {
-	Title = "Auto Collect Dino Bones",
-	Description = "",
+xF:Toggle({
+	Name = "Auto Collect Dino Bones",
 	Default = false,
 	Callback = function(Y)
 		_G.Prehis_DB = Y;
@@ -8333,9 +8247,8 @@ spawn(function()
 		end);
 	end;
 end);
-xF:AddToggle("xF_AddToggle_147", {
-	Title = "Auto Collect Dragon Eggs",
-	Description = "",
+xF:Toggle({
+	Name = "Auto Collect Dragon Eggs",
 	Default = false,
 	Callback = function(Y)
 		_G.Prehis_DE = Y;
@@ -8353,9 +8266,8 @@ spawn(function()
 		end);
 	end;
 end);
-xF:AddToggle("xF_AddToggle_148", {
-	Title = "Auto Reset When Complete Volcano",
-	Description = "Reset When Complete Volcano not collect dino bones and else..",
+xF:Toggle({
+	Name = "Auto Reset When Complete Volcano",
 	Default = false,
 	Callback = function(Y)
 		_G.ResetPH = Y;
@@ -8381,15 +8293,15 @@ spawn(function()
 		end);
 	end;
 end);
-local dq = Zz:AddSection("Dungeon Event / Raiding");
-local Rq = dq:AddParagraph({ Title = " Raiding Status ", Content = "" });
+local dq = Zz:Section({ Name = "Dungeon Event / Raiding" });
+local Rq = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(.2) do
 		pcall(function()
 			if d.PlayerGui.Main.Timer.Visible == true then
-				Rq:SetDesc(" Raiding Statud : True");
+				Rq:Change(" Raiding Statud : True");
 			else
-				Rq:SetDesc(" Raiding Statud : False");
+				Rq:Change(" Raiding Statud : False");
 			end;
 		end);
 	end;
@@ -8411,19 +8323,16 @@ j = {
 -- CreateDropdown tidak pernah manggil Callback untuk nilai Default, jadi
 -- _G.SelectChip masih nil sampai user klik manual walaupun UI nampilin "Flame".
 _G.SelectChip = _G.SelectChip or "Flame";
-dq:AddDropdown("dq_AddDropdown_10", {
-	Title = "Select Chip",
-	Description = "",
-	Values = j,
+dq:Dropdown({
+	Name = "Select Chip",
+	Items = j,
 	Default = "Flame",
-	Multi = false,
 	Callback = function(Y)
 		_G.SelectChip = Y;
 	end,
 });
-dq:AddToggle("dq_AddToggle_149", {
-	Title = "Auto Select Dungeon Chip",
-	Description = "",
+dq:Toggle({
+	Name = "Auto Select Dungeon Chip",
 	Default = false,
 	Callback = function(Y)
 		_G.AutoSelectDungeon = Y;
@@ -8469,7 +8378,7 @@ spawn(function()
 end);
 -- Anti-spam: cooldown 2 detik antar klik tombol Beli biar gak kena rate-limit.
 _LastBeliBuy = 0;
-dq:AddButton({ Title = "Buy Dungeon Chips [Beli]", Callback = function()
+dq:Button({ Name = "Buy Dungeon Chips [Beli]", Callback = function()
 		if GetBP("Special Microchip") or not _G.SelectChip then
 			return;
 		end;
@@ -8481,7 +8390,7 @@ dq:AddButton({ Title = "Buy Dungeon Chips [Beli]", Callback = function()
 			Q.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", _G.SelectChip);
 		end);
 	end });
-dq:AddButton({ Title = "Buy Dungeon Chips [Devil Fruit]", Callback = function()
+dq:Button({ Name = "Buy Dungeon Chips [Devil Fruit]", Callback = function()
 		if GetBP("Special Microchip") or not _G.SelectChip then
 			return;
 		end;
@@ -8496,10 +8405,9 @@ dq:AddButton({ Title = "Buy Dungeon Chips [Devil Fruit]", Callback = function()
 			end;
 		end);
 	end });
-local Qq = Zz:AddSection("Raiding Menu");
-Qq:AddToggle("Qq_AddToggle_150", {
-	Title = "Auto Start Raid",
-	Description = "",
+local Qq = Zz:Section({ Name = "Raiding Menu" });
+Qq:Toggle({
+	Name = "Auto Start Raid",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_StartRaid = Y;
@@ -8527,9 +8435,8 @@ spawn(function()
 		end);
 	end;
 end);
-Qq:AddToggle("Qq_AddToggle_151", {
-	Title = "Teleport To Lab",
-	Description = "",
+Qq:Toggle({
+	Name = "Teleport To Lab",
 	Default = false,
 	Callback = function(Y)
 		_G.TpLab = Y;
@@ -8547,9 +8454,8 @@ Qq:AddToggle("Qq_AddToggle_151", {
 		end);
 	end,
 });
-Qq:AddToggle("Qq_AddToggle_152", {
-	Title = "Auto Complete Raid [Safety]",
-	Description = "",
+Qq:Toggle({
+	Name = "Auto Complete Raid [Safety]",
 	Default = false,
 	Callback = function(Y)
 		_G.Raiding = Y;
@@ -8593,9 +8499,8 @@ spawn(function()
 		end;
 	end);
 end);
-Qq:AddToggle("Qq_AddToggle_153", {
-	Title = "Kill Aura",
-	Description = "",
+Qq:Toggle({
+	Name = "Kill Aura",
 	Default = false,
 	Callback = function(Y)
 		_G.KillH = Y;
@@ -8620,9 +8525,8 @@ spawn(function()
 		end;
 	end;
 end);
-Qq:AddToggle("Qq_AddToggle_154", {
-	Title = "Auto Next Island",
-	Description = "",
+Qq:Toggle({
+	Name = "Auto Next Island",
 	Default = false,
 	Callback = function(Y)
 		NextIs = Y;
@@ -8647,9 +8551,8 @@ spawn(function()
 		end;
 	end;
 end);
-Qq:AddToggle("Qq_AddToggle_155", {
-	Title = "Auto Awakening",
-	Description = "",
+Qq:Toggle({
+	Name = "Auto Awakening",
 	Default = false,
 	Callback = function(Y)
 		_G.Auto_Awakener = Y;
@@ -8665,24 +8568,24 @@ spawn(function()
 		end);
 	end;
 end);
-local rq = Tz:AddSection("Combat / Aimbot");
-__indexPlayer = rq:AddParagraph({ Title = "All Players On Server :", Content = "" });
+local rq = Tz:Section({ Name = "Combat / Aimbot" });
+__indexPlayer = setmetatable({}, {__index={Change=function()end}})
 spawn(function()
 	while wait(T) do
 		pcall(function()
 			for Y, d in pairs((game:GetService("Players")):GetPlayers()) do
 				if Y == 12 then
-					__indexPlayer:SetDesc("All Players :" .. (" " .. (Y .. " / 12 [Max]")));
+					__indexPlayer:Change("All Players :" .. (" " .. (Y .. " / 12 [Max]")));
 				elseif Y == 1 then
-					__indexPlayer:SetDesc("All Players  :" .. (" " .. (Y .. " / 12")));
+					__indexPlayer:Change("All Players  :" .. (" " .. (Y .. " / 12")));
 				else
-					__indexPlayer:SetDesc("All Players  :" .. (" " .. (Y .. " / 12")));
+					__indexPlayer:Change("All Players  :" .. (" " .. (Y .. " / 12")));
 				end;
 			end;
 		end);
 	end;
 end);
-__AimBotTurn = rq:AddParagraph({ Title = "Aimbot Status :", Content = "" });
+__AimBotTurn = setmetatable({}, {__index={Change=function()end}})
 local aq = { "AimBots Skill", "Auto Aimbots" };
 Checking_AimStatus = function()
 		if _G.AimCam then
@@ -8700,11 +8603,11 @@ spawn(function()
 	while wait(.2) do
 		pcall(function()
 			if _G.AimMethod then
-				__AimBotTurn:SetDesc("Aimbot - Skills : True");
+				__AimBotTurn:Change("Aimbot - Skills : True");
 			elseif (_G.AimCam or _G.AimbotGun) and _G.AimMethod then
-				__AimBotTurn:SetDesc("Aimbot - Skills |" .. (Checking_AimStatus() .. " :True"));
+				__AimBotTurn:Change("Aimbot - Skills |" .. (Checking_AimStatus() .. " :True"));
 			else
-				__AimBotTurn:SetDesc("Aimbot - Skills : False");
+				__AimBotTurn:Change("Aimbot - Skills : False");
 			end;
 		end);
 	end;
@@ -8713,19 +8616,16 @@ local wq = {};
 for Y, d in pairs((game:GetService("Players")):GetChildren()) do
 	table.insert(wq, d.Name);
 end;
-rq:AddDropdown("rq_AddDropdown_11", {
-	Title = "Choose Players",
-	Description = "",
-	Values = wq,
+rq:Dropdown({
+	Name = "Choose Players",
+	Items = wq,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		_G.PlayersList = Y;
 	end,
 });
-rq:AddToggle("rq_AddToggle_156", {
-	Title = "Teleport to choose players",
-	Description = "",
+rq:Toggle({
+	Name = "Teleport to choose players",
 	Default = false,
 	Callback = function(Y)
 		_G.TpPly = Y;
@@ -8739,34 +8639,34 @@ rq:AddToggle("rq_AddToggle_156", {
 		end);
 	end,
 });
-rq:AddToggle("rq_AddToggle_157", {
-	Title = "Spectate Choose Players",
-	Description = "",
+rq:Toggle({
+	Name = "Spectate Choose Players",
 	Default = false,
 	Callback = function(Y)
 		SpectatePlys = Y;
 		spawn(function()
 			repeat
 				task.wait(.1);
-				workspace.Camera.CameraSubject = ((game:GetService("Players")):FindFirstChild(_G.PlayersList)).Character.Humanoid;
+				if not _G.PlayersList then break end;
+				local ply = (game:GetService("Players")):FindFirstChild(_G.PlayersList);
+				if ply and ply.Character then
+					workspace.Camera.CameraSubject = ply.Character.Humanoid;
+				end;
 			until not SpectatePlys;
 			workspace.Camera.CameraSubject = d.Character.Humanoid;
 		end);
 	end,
 });
-rq:AddDropdown("rq_AddDropdown_12", {
-	Title = "Choose Aim Method",
-	Description = "",
-	Values = aq,
+rq:Dropdown({
+	Name = "Choose Aim Method",
+	Items = aq,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		ABmethod = Y;
 	end,
 });
-rq:AddToggle("rq_AddToggle_158", {
-	Title = "Aimbot Method Skills",
-	Description = "",
+rq:Toggle({
+	Name = "Aimbot Method Skills",
 	Default = false,
 	Callback = function(Y)
 		_G.AimMethod = Y;
@@ -8803,9 +8703,8 @@ task.spawn(function()
 		end);
 	end;
 end);
-rq:AddToggle("rq_AddToggle_159", {
-	Title = "Aimbot Camera Closet Players",
-	Description = "",
+rq:Toggle({
+	Name = "Aimbot Camera Closet Players",
 	Default = false,
 	Callback = function(Y)
 		_G.AimCam = Y;
@@ -8840,10 +8739,9 @@ task.spawn(function()
 		end);
 	end;
 end);
-local Fq = Tz:AddSection("LocalPlayer Settings / Misc");
-Fq:AddToggle("Fq_AddToggle_160", {
-	Title = "Instance Mink V3 [ INF ]",
-	Description = "turn on for make mink v3 infinity",
+local Fq = Tz:Section({ Name = "LocalPlayer Settings / Misc" });
+Fq:Toggle({
+	Name = "Instance Mink V3 [ INF ]",
 	Default = false,
 	Callback = function(Y)
 		InfAblities = Y;
@@ -8864,9 +8762,8 @@ spawn(function()
 		end);
 	end;
 end);
-Fq:AddToggle("Fq_AddToggle_161", {
-	Title = "Instance Energy [ INF ]",
-	Description = "turn on for make energy infinity",
+Fq:Toggle({
+	Name = "Instance Energy [ INF ]",
 	Default = false,
 	Callback = function(Y)
 		infEnergy = Y;
@@ -8875,9 +8772,8 @@ Fq:AddToggle("Fq_AddToggle_161", {
 		end;
 	end,
 });
-Fq:AddToggle("Fq_AddToggle_162", {
-	Title = "Instance Soru [ INF ]",
-	Description = "turn on for make soru infinity",
+Fq:Toggle({
+	Name = "Instance Soru [ INF ]",
 	Default = false,
 	Callback = function(Y)
 		_G.InfSoru = Y;
@@ -8886,9 +8782,8 @@ Fq:AddToggle("Fq_AddToggle_162", {
 		end;
 	end,
 });
-Fq:AddToggle("Fq_AddToggle_163", {
-	Title = "Instance Observation Range [ INF ]",
-	Description = "turn on for make observation range infinity",
+Fq:Toggle({
+	Name = "Instance Observation Range [ INF ]",
 	Default = false,
 	Callback = function(Y)
 		_G.InfiniteObRange = Y;
@@ -8897,18 +8792,16 @@ Fq:AddToggle("Fq_AddToggle_163", {
 		end;
 	end,
 });
-local Mq = Tz:AddSection("Settings Combat / Aimbot Settings");
-Mq:AddToggle("Mq_AddToggle_164", {
-	Title = "Ignore Same Teams",
-	Description = "turn on for ignore not aimbot same team",
+local Mq = Tz:Section({ Name = "Settings Combat / Aimbot Settings" });
+Mq:Toggle({
+	Name = "Ignore Same Teams",
 	Default = false,
 	Callback = function(Y)
 		_G.NoAimTeam = Y;
 	end,
 });
-Mq:AddToggle("Mq_AddToggle_165", {
-	Title = "Accept Allies",
-	Description = "turn on for auto accept ally",
+Mq:Toggle({
+	Name = "Accept Allies",
 	Default = false,
 	Callback = function(Y)
 		_G.AcceptAlly = Y;
@@ -8927,7 +8820,7 @@ spawn(function()
 		end;
 	end;
 end);
-local Kq = Tz:AddSection("Esp Items / Entity / Island");
+local Kq = Tz:Section({ Name = "Esp Items / Entity / Island" });
 function isnil(Y)
 	return Y == nil;
 end;
@@ -9407,9 +9300,8 @@ berriesEsp = function()
 			end;
 		end;
 	end;
-Kq:AddToggle("Kq_AddToggle_166", {
-	Title = "Esp Berries",
-	Description = "",
+Kq:Toggle({
+	Name = "Esp Berries",
 	Default = false,
 	Callback = function(Y)
 		BerryEsp = Y;
@@ -9421,9 +9313,8 @@ Kq:AddToggle("Kq_AddToggle_166", {
 		end);
 	end,
 });
-Kq:AddToggle("Kq_AddToggle_167", {
-	Title = "Esp Players",
-	Description = "",
+Kq:Toggle({
+	Name = "Esp Players",
 	Default = false,
 	Callback = function(Y)
 		PlayerEsp = Y;
@@ -9435,9 +9326,8 @@ Kq:AddToggle("Kq_AddToggle_167", {
 		end);
 	end,
 });
-Kq:AddToggle("Kq_AddToggle_168", {
-	Title = "Esp Chests",
-	Description = "",
+Kq:Toggle({
+	Name = "Esp Chests",
 	Default = false,
 	Callback = function(Y)
 		ChestESP = Y;
@@ -9449,9 +9339,8 @@ Kq:AddToggle("Kq_AddToggle_168", {
 		end);
 	end,
 });
-Kq:AddToggle("Kq_AddToggle_169", {
-	Title = "Esp Fruits",
-	Description = "",
+Kq:Toggle({
+	Name = "Esp Fruits",
 	Default = false,
 	Callback = function(Y)
 		DevilFruitESP = Y;
@@ -9463,9 +9352,8 @@ Kq:AddToggle("Kq_AddToggle_169", {
 		end);
 	end,
 });
-Kq:AddToggle("Kq_AddToggle_170", {
-	Title = "Esp Island Location",
-	Description = "",
+Kq:Toggle({
+	Name = "Esp Island Location",
 	Default = false,
 	Callback = function(Y)
 		IslandESP = Y;
@@ -9478,9 +9366,8 @@ Kq:AddToggle("Kq_AddToggle_170", {
 	end,
 });
 if World2 then
-	Kq:AddToggle("Kq_AddToggle_171", {
-		Title = "Esp Flower",
-		Description = "",
+	Kq:Toggle({
+		Name = "Esp Flower",
 		Default = false,
 		Callback = function(Y)
 			FlowerESP = Y;
@@ -9492,9 +9379,8 @@ if World2 then
 			end);
 		end,
 	});
-	Kq:AddToggle("Kq_AddToggle_172", {
-		Title = "Esp Legendary Sword",
-		Description = "",
+	Kq:Toggle({
+		Name = "Esp Legendary Sword",
 		Default = false,
 		Callback = function(Y)
 			LegenS = Y;
@@ -9508,9 +9394,8 @@ if World2 then
 	});
 end;
 if World2 or World3 then
-	Kq:AddToggle("Kq_AddToggle_173", {
-		Title = "Esp Aura Colour Dealers",
-		Description = "",
+	Kq:Toggle({
+		Name = "Esp Aura Colour Dealers",
 		Default = false,
 		Callback = function(Y)
 			ColorEsp = Y;
@@ -9524,9 +9409,8 @@ if World2 or World3 then
 	});
 end;
 if World3 then
-	Kq:AddToggle("Kq_AddToggle_174", {
-		Title = "Esp Gears",
-		Description = "",
+	Kq:Toggle({
+		Name = "Esp Gears",
 		Default = false,
 		Callback = function(Y)
 			ESPGear = Y;
@@ -9538,9 +9422,8 @@ if World3 then
 			end);
 		end,
 	});
-	Kq:AddToggle("Kq_AddToggle_175", {
-		Title = "Esp SeaEvent Island",
-		Description = "",
+	Kq:Toggle({
+		Name = "Esp SeaEvent Island",
 		Default = false,
 		Callback = function(Y)
 			EspEventIsland = Y;
@@ -9552,9 +9435,8 @@ if World3 then
 			end);
 		end,
 	});
-	Kq:AddToggle("Kq_AddToggle_176", {
-		Title = "Esp Advanced Fruits Dealer",
-		Description = "",
+	Kq:Toggle({
+		Name = "Esp Advanced Fruits Dealer",
 		Default = false,
 		Callback = function(Y)
 			advanEsp = Y;
@@ -9567,34 +9449,31 @@ if World3 then
 		end,
 	});
 end;
-local Iq = kz:AddSection("Travel - Worlds");
-Iq:AddButton({ Title = "Travel East Blue (World 1)", Callback = function()
+local Iq = kz:Section({ Name = "Travel - Worlds" });
+Iq:Button({ Name = "Travel East Blue (World 1)", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("TravelMain");
 	end });
-Iq:AddButton({ Title = "Travel Dressrosa (World 2)", Callback = function()
+Iq:Button({ Name = "Travel Dressrosa (World 2)", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("TravelDressrosa");
 	end });
-Iq:AddButton({ Title = "Travel Zou (World 3)", Callback = function()
+Iq:Button({ Name = "Travel Zou (World 3)", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("TravelZou");
 	end });
-local Wq = kz:AddSection("Travel - Island");
+local Wq = kz:Section({ Name = "Travel - Island" });
 Location = {};
 for Y, d in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
 	table.insert(Location, d.Name);
 end;
-Wq:AddDropdown("Wq_AddDropdown_13", {
-	Title = "Select Travelling",
-	Description = "",
-	Values = Location,
+Wq:Dropdown({
+	Name = "Select Travelling",
+	Items = Location,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		_G.Island = Y;
 	end,
 });
-Wq:AddToggle("Wq_AddToggle_177", {
-	Title = "Auto Travel",
-	Description = "Automatic teleport to pos island",
+Wq:Toggle({
+	Name = "Auto Travel",
 	Default = false,
 	Callback = function(Y)
 		_G.Teleport = Y;
@@ -9602,17 +9481,26 @@ Wq:AddToggle("Wq_AddToggle_177", {
 			spawn(function()
 				for Y, d in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
 					if d.Name == _G.Island then
+						-- Berhenti berdasarkan jarak ke tujuan, bukan CFrame persis.
+						-- R.CFrame == d.CFrame tidak pernah true karena _tp menaruh
+						-- player di offset +30 Y, jadi loop lama tidak pernah selesai
+						-- dan terus menarik player balik ke tujuan -- inilah yang bikin
+						-- keluar dari submarine nyangkut.
+						local Dest = d.CFrame * CFrame.new(0, 30, 0);
+						local HRP;
 						repeat
 							wait();
-							_tp(d.CFrame * CFrame.new(0, 30, 0));
-						until not _G.Teleport or R.CFrame == d.CFrame;
+							_tp(Dest);
+							HRP = g.Character and g.Character:FindFirstChild("HumanoidRootPart");
+						until not _G.Teleport or (HRP and (HRP.Position - Dest.Position).Magnitude <= 10);
+						_G.Teleport = false;
 					end;
 				end;
 			end);
 		end;
 	end,
 });
-local Nq = kz:AddSection("Travel - Portal");
+local Nq = kz:Section({ Name = "Travel - Portal" });
 if World1 then
 	Location_Portal = { "Sky", "UnderWater" };
 elseif World2 then
@@ -9626,17 +9514,15 @@ elseif World3 then
 			"Temple of Time",
 		};
 end;
-Nq:AddDropdown("Nq_AddDropdown_14", {
-	Title = "Select Portal",
-	Description = "",
-	Values = Location_Portal,
+Nq:Dropdown({
+	Name = "Select Portal",
+	Items = Location_Portal,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		_G.Island_PT = Y;
 	end,
 });
-Nq:AddButton({ Title = "requestEntrance", Callback = function()
+Nq:Button({ Name = "requestEntrance", Callback = function()
 		if _G.Island_PT == "Sky" then
 			Q.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-7894, 5547, -380));
 		elseif _G.Island_PT == "UnderWater" then
@@ -9657,23 +9543,20 @@ Nq:AddButton({ Title = "requestEntrance", Callback = function()
 			Q.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28310.0234, 14895.1123, 109.456741, -0.469690144, -2.85620132e-08, -0.882831335, -3.23509219e-08, 1, -1.51411736e-08, .882831335, 2.14487486e-08, -0.469690144));
 		end;
 	end });
-local Dq = kz:AddSection("Travel - NPCs");
+local Dq = kz:Section({ Name = "Travel - NPCs" });
 for Y, d in pairs(Q.NPCs:GetChildren()) do
 	table.insert(m, d.Name);
 end;
-Dq:AddDropdown("Dq_AddDropdown_15", {
-	Title = "Select NPCs",
-	Description = "",
-	Values = m,
+Dq:Dropdown({
+	Name = "Select NPCs",
+	Items = m,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		NPClist = Y;
 	end,
 });
-Dq:AddToggle("Dq_AddToggle_178", {
-	Title = "Auto Tween to NPCs",
-	Description = "Automatic teleport to pos Npcs",
+Dq:Toggle({
+	Name = "Auto Tween to NPCs",
 	Default = false,
 	Callback = function(Y)
 		_G.TPNpc = Y;
@@ -9692,7 +9575,7 @@ spawn(function()
 		end;
 	end;
 end);
-local Aq = Lz:AddSection("Fruits Options");
+local Aq = Lz:Section({ Name = "Fruits Options" });
 local uq = {};
 local function gq(Y)
 	local d = tostring(Y);
@@ -9719,25 +9602,21 @@ for Y, d in pairs(Q.Remotes.CommF_:InvokeServer("GetFruits", false)) do
 		table.insert(zq, R);
 	end;
 end;
-Aq:AddDropdown("Aq_AddDropdown_16", {
-	Title = "Select Fruit Stock",
-	Description = "",
-	Values = zq,
+Aq:Dropdown({
+	Name = "Select Fruit Stock",
+	Items = zq,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		_G.SelectFruit = Y;
 	end,
 });
-Aq:AddButton({ Title = "Buy Basic Stock", Callback = function()
+Aq:Button({ Name = "Buy Basic Stock", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("PurchaseRawFruit", _G.SelectFruit);
 	end });
-Aq:AddDropdown("Aq_AddDropdown_17", {
-	Title = "Select Mirage Fruit",
-	Description = "",
-	Values = uq,
+Aq:Dropdown({
+	Name = "Select Mirage Fruit",
+	Items = uq,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		SelectF_Adv = Y;
 	end,
@@ -9750,12 +9629,11 @@ for Y, d in pairs(Q.Remotes.CommF_:InvokeServer("GetFruits", false)) do
 		table.insert(iq, R);
 	end;
 end;
-Aq:AddButton({ Title = "Buy Mirage Stock", Callback = function()
+Aq:Button({ Name = "Buy Mirage Stock", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("PurchaseRawFruit", SelectF_Adv);
 	end });
-Aq:AddToggle("Aq_AddToggle_179", {
-	Title = "Auto Random Fruit",
-	Description = "Automatic random devil fruit",
+Aq:Toggle({
+	Name = "Auto Random Fruit",
 	Default = false,
 	Callback = function(Y)
 		_G.Random_Auto = Y;
@@ -9770,9 +9648,8 @@ spawn(function()
 		end);
 	end;
 end);
-Aq:AddToggle("Aq_AddToggle_180", {
-	Title = "Auto Drop Fruit",
-	Description = "Automatic drop devil fruit",
+Aq:Toggle({
+	Name = "Auto Drop Fruit",
 	Default = false,
 	Callback = function(Y)
 		_G.DropFruit = Y;
@@ -9787,9 +9664,8 @@ spawn(function()
 		end;
 	end;
 end);
-Aq:AddToggle("Aq_AddToggle_181", {
-	Title = "Auto Store Fruit",
-	Description = "Automatic store devil fruit",
+Aq:Toggle({
+	Name = "Auto Store Fruit",
 	Default = false,
 	Callback = function(Y)
 		_G.StoreF = Y;
@@ -9804,9 +9680,8 @@ spawn(function()
 		end;
 	end;
 end);
-Aq:AddToggle("Aq_AddToggle_182", {
-	Title = "Auto Tween to Fruit",
-	Description = "Automatic tween to get devil fruit",
+Aq:Toggle({
+	Name = "Auto Tween to Fruit",
 	Default = false,
 	Callback = function(Y)
 		_G.TwFruits = Y;
@@ -9825,9 +9700,8 @@ spawn(function()
 		end;
 	end;
 end);
-Aq:AddToggle("Aq_AddToggle_183", {
-	Title = "Auto Collect Fruit",
-	Description = "Automatic bring devil fruit",
+Aq:Toggle({
+	Name = "Auto Collect Fruit",
 	Default = false,
 	Callback = function(Y)
 		_G.InstanceF = Y;
@@ -9842,171 +9716,170 @@ spawn(function()
 		end;
 	end;
 end);
-local Uq = Pz:AddSection("Shop Options");
-Uq:AddButton({ Title = "Buy Buso", Callback = function()
+local Uq = Pz:Section({ Name = "Shop Options" });
+Uq:Button({ Name = "Buy Buso", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyHaki", "Buso");
 	end });
-Uq:AddButton({ Title = "Buy Geppo", Callback = function()
+Uq:Button({ Name = "Buy Geppo", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyHaki", "Geppo");
 	end });
-Uq:AddButton({ Title = "Buy Soru", Callback = function()
+Uq:Button({ Name = "Buy Soru", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyHaki", "Soru");
 	end });
-Uq:AddButton({ Title = "Buy Ken", Callback = function()
+Uq:Button({ Name = "Buy Ken", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("KenTalk", "Buy");
 	end });
-local Cq = Pz:AddSection("Fighting - Style");
-Cq:AddButton({ Title = "Buy Black Leg", Callback = function()
+local Cq = Pz:Section({ Name = "Fighting - Style" });
+Cq:Button({ Name = "Buy Black Leg", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyBlackLeg");
 	end });
-Cq:AddButton({ Title = "Buy Electro", Callback = function()
+Cq:Button({ Name = "Buy Electro", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyElectro");
 	end });
-Cq:AddButton({ Title = "Buy Fishman Karate", Callback = function()
+Cq:Button({ Name = "Buy Fishman Karate", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyFishmanKarate");
 	end });
-Cq:AddButton({ Title = "Buy DragonClaw", Callback = function()
+Cq:Button({ Name = "Buy DragonClaw", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2");
 	end });
-Cq:AddButton({ Title = "Buy Superhuman", Callback = function()
+Cq:Button({ Name = "Buy Superhuman", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuySuperhuman");
 	end });
-Cq:AddButton({ Title = "Buy Death Step", Callback = function()
+Cq:Button({ Name = "Buy Death Step", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyDeathStep");
 	end });
-Cq:AddButton({ Title = "Buy Sharkman Karate", Callback = function()
+Cq:Button({ Name = "Buy Sharkman Karate", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuySharkmanKarate");
 	end });
-Cq:AddButton({ Title = "Buy ElectricClaw", Callback = function()
+Cq:Button({ Name = "Buy ElectricClaw", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyElectricClaw");
 	end });
-Cq:AddButton({ Title = "Buy DragonTalon", Callback = function()
+Cq:Button({ Name = "Buy DragonTalon", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyDragonTalon");
 	end });
-Cq:AddButton({ Title = "Buy Godhuman", Callback = function()
+Cq:Button({ Name = "Buy Godhuman", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyGodhuman");
 	end });
-Cq:AddButton({ Title = "Buy SanguineArt", Callback = function()
+Cq:Button({ Name = "Buy SanguineArt", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuySanguineArt");
 	end });
-local vq = Pz:AddSection("Accessory");
-vq:AddButton({ Title = "Buy Tomoe Ring", Callback = function()
+local vq = Pz:Section({ Name = "Accessory" });
+vq:Button({ Name = "Buy Tomoe Ring", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Tomoe Ring");
 	end });
-vq:AddButton({ Title = "Buy Black Cape", Callback = function()
+vq:Button({ Name = "Buy Black Cape", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Black Cape");
 	end });
-vq:AddButton({ Title = "Buy Swordsman Hat", Callback = function()
+vq:Button({ Name = "Buy Swordsman Hat", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Swordsman Hat");
 	end });
-vq:AddButton({ Title = "Buy Bizarre Rifle", Callback = function()
+vq:Button({ Name = "Buy Bizarre Rifle", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("Ectoplasm", "Buy", 1);
 	end });
-vq:AddButton({ Title = "Buy Ghoul Mask", Callback = function()
+vq:Button({ Name = "Buy Ghoul Mask", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("Ectoplasm", "Buy", 2);
 	end });
-local mq = Pz:AddSection("Accessory SeaEvent");
-mq:AddButton({ Title = "Craft Dragonheart", Callback = function()
+local mq = Pz:Section({ Name = "Accessory SeaEvent" });
+mq:Button({ Name = "Craft Dragonheart", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "Dragonheart");
 	end });
-mq:AddButton({ Title = "Craft Dragonstorm", Callback = function()
+mq:Button({ Name = "Craft Dragonstorm", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "Dragonstorm");
 	end });
-mq:AddButton({ Title = "Craft DinoHood", Callback = function()
+mq:Button({ Name = "Craft DinoHood", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "DinoHood");
 	end });
-mq:AddButton({ Title = "Craft SharkTooth", Callback = function()
+mq:Button({ Name = "Craft SharkTooth", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "SharkTooth");
 	end });
-mq:AddButton({ Title = "Craft TerrorJaw", Callback = function()
+mq:Button({ Name = "Craft TerrorJaw", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "TerrorJaw");
 	end });
-mq:AddButton({ Title = "Craft SharkAnchor", Callback = function()
+mq:Button({ Name = "Craft SharkAnchor", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "SharkAnchor");
 	end });
-mq:AddButton({ Title = "Craft LeviathanCrown", Callback = function()
+mq:Button({ Name = "Craft LeviathanCrown", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LeviathanCrown");
 	end });
-mq:AddButton({ Title = "Craft LeviathanShield", Callback = function()
+mq:Button({ Name = "Craft LeviathanShield", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LeviathanShield");
 	end });
-mq:AddButton({ Title = "Craft LeviathanBoat", Callback = function()
+mq:Button({ Name = "Craft LeviathanBoat", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LeviathanBoat");
 	end });
-mq:AddButton({ Title = "Craft LegendaryScroll", Callback = function()
+mq:Button({ Name = "Craft LegendaryScroll", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "LegendaryScroll");
 	end });
-mq:AddButton({ Title = "Craft MythicalScroll", Callback = function()
+mq:Button({ Name = "Craft MythicalScroll", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CraftItem", "Craft", "MythicalScroll");
 	end });
-local yq = Pz:AddSection("Weapon World1");
-yq:AddButton({ Title = "Buy Cutlass", Callback = function()
+local yq = Pz:Section({ Name = "Weapon World1" });
+yq:Button({ Name = "Buy Cutlass", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Cutlass");
 	end });
-yq:AddButton({ Title = "Buy Katana", Callback = function()
+yq:Button({ Name = "Buy Katana", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Katana");
 	end });
-yq:AddButton({ Title = "Buy Iron Mace", Callback = function()
+yq:Button({ Name = "Buy Iron Mace", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Iron Mace");
 	end });
-yq:AddButton({ Title = "Buy Duel Katana", Callback = function()
+yq:Button({ Name = "Buy Duel Katana", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Duel Katana");
 	end });
-yq:AddButton({ Title = "Buy Triple Katana", Callback = function()
+yq:Button({ Name = "Buy Triple Katana", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Triple Katana");
 	end });
-yq:AddButton({ Title = "Buy Pipe", Callback = function()
+yq:Button({ Name = "Buy Pipe", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Pipe");
 	end });
-yq:AddButton({ Title = "Buy Dual-Headed Blade", Callback = function()
+yq:Button({ Name = "Buy Dual-Headed Blade", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Dual-Headed Blade");
 	end });
-yq:AddButton({ Title = "Buy Bisento", Callback = function()
+yq:Button({ Name = "Buy Bisento", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Bisento");
 	end });
-yq:AddButton({ Title = "Buy Soul Cane", Callback = function()
+yq:Button({ Name = "Buy Soul Cane", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Soul Cane");
 	end });
-yq:AddButton({ Title = "Buy Slingshot", Callback = function()
+yq:Button({ Name = "Buy Slingshot", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Slingshot");
 	end });
-yq:AddButton({ Title = "Buy Musket", Callback = function()
+yq:Button({ Name = "Buy Musket", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Musket");
 	end });
-yq:AddButton({ Title = "Buy Dual Flintlock", Callback = function()
+yq:Button({ Name = "Buy Dual Flintlock", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Dual Flintlock");
 	end });
-yq:AddButton({ Title = "Buy Flintlock", Callback = function()
+yq:Button({ Name = "Buy Flintlock", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Flintlock");
 	end });
-yq:AddButton({ Title = "Buy Refined Flintlock", Callback = function()
+yq:Button({ Name = "Buy Refined Flintlock", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Refined Flintlock");
 	end });
-yq:AddButton({ Title = "Buy Cannon", Callback = function()
+yq:Button({ Name = "Buy Cannon", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BuyItem", "Cannon");
 	end });
-yq:AddButton({ Title = "Buy Kabucha", Callback = function()
+yq:Button({ Name = "Buy Kabucha", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BlackbeardReward", "Slingshot", "2");
 	end });
-local bq = Pz:AddSection("Fragments shop");
-bq:AddButton({ Title = "Buy Refund Stats", Callback = function()
+local bq = Pz:Section({ Name = "Fragments shop" });
+bq:Button({ Name = "Buy Refund Stats", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "2");
 	end });
-bq:AddButton({ Title = "Buy Reroll Race", Callback = function()
+bq:Button({ Name = "Buy Reroll Race", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "2");
 	end });
-bq:AddButton({ Title = "Buy Ghoul Race (2.5k)", Callback = function()
+bq:Button({ Name = "Buy Ghoul Race (2.5k)", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("Ectoplasm", " Change", 4);
 	end });
-bq:AddButton({ Title = "Buy Cyborg Race (2.5k)", Callback = function()
+bq:Button({ Name = "Buy Cyborg Race (2.5k)", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("CyborgTrainer", " Buy");
 	end });
-local cq = jz:AddSection("Server - Function");
+local cq = jz:Section({ Name = "Server - Function" });
 
-cq:AddDropdown("cq_AddDropdown_18", {
-	Title = "Server Hop Function",
-	Description = "Auto hops servers and re-enables this function after join",
-	Values = {
+cq:Dropdown({
+	Name = "Server Hop Function",
+	Items = {
 		"Auto Farm Level",
 		"Auto Farm Nearest",
 		"Auto Mastery Fruits",
@@ -10023,20 +9896,20 @@ cq:AddDropdown("cq_AddDropdown_18", {
 		ServerHopFunc = Y;
 	end,
 });
-cq:AddButton({ Title = "Hop + Resume Function", Callback = function()
+cq:Button({ Name = "Hop + Resume Function", Callback = function()
 		if ServerHopFunc ~= "None" then
-			nz.Notify("Server Hop", "Hopping and will resume: " .. ServerHopFunc, 5);
+			nz_Notify("Server Hop", "Hopping and will resume: " .. ServerHopFunc, 5);
 		end;
 		wait(.5);
 		Hop();
 	end });
-cq:AddButton({ Title = "Rejoin Server", Callback = function()
+cq:Button({ Name = "Rejoin Server", Callback = function()
 		(game:GetService("TeleportService")):Teleport(game.PlaceId, game.Players.LocalPlayer);
 	end });
-cq:AddButton({ Title = "Hop Server", Callback = function()
+cq:Button({ Name = "Hop Server", Callback = function()
 		Hop();
 	end });
-cq:AddButton({ Title = "Hop to Lowest Players", Callback = function()
+cq:Button({ Name = "Hop to Lowest Players", Callback = function()
 		local Y = game:GetService("HttpService");
 		local R = game:GetService("TeleportService");
 		local Q = "https://games.roblox.com/v1/games/";
@@ -10054,7 +9927,7 @@ cq:AddButton({ Title = "Hop to Lowest Players", Callback = function()
 		until w;
 		R:TeleportToPlaceInstance(r, w.id, d);
 	end });
-cq:AddButton({ Title = "Hop to Lowest Pings Server", Callback = function()
+cq:Button({ Name = "Hop to Lowest Pings Server", Callback = function()
 		local Y = game:GetService("HttpService");
 		local d = game:GetService("TeleportService");
 		local R = game:GetService("Stats");
@@ -10092,16 +9965,6 @@ cq:AddButton({ Title = "Hop to Lowest Pings Server", Callback = function()
  
 		end;
 	end });
-cq:AddInput("cq_AddInput_1", {
-	Title = "JobID",
-	Placeholder = "Type something...",
-	Default = "",
-	Numeric = false,
-	Finished = false,
-	Callback = function(Y)
-	_G.JobId = Y;
-	end,
-});
 spawn(function()
 	while wait(T) do
 		if _G.JobId then
@@ -10119,23 +9982,22 @@ spawn(function()
 		end;
 	end;
 end);
-cq:AddButton({ Title = "Teleport [Job ID]", Callback = function()
+cq:Button({ Name = "Teleport [Job ID]", Callback = function()
 		Q.__ServerBrowser:InvokeServer("teleport", _G.JobId);
 	end });
-cq:AddButton({ Title = "Copy JobID", Callback = function()
+cq:Button({ Name = "Copy JobID", Callback = function()
 		setclipboard(tostring(game.JobId));
 	end });
-local Hq = jz:AddSection("Player Gui / Others");
-Hq:AddButton({ Title = "Open Awakenings Expert", Callback = function()
+local Hq = jz:Section({ Name = "Player Gui / Others" });
+Hq:Button({ Name = "Open Awakenings Expert", Callback = function()
 		d.PlayerGui.Main.AwakeningToggler.Visible = true;
 	end });
-Hq:AddButton({ Title = "Open Title Selection", Callback = function()
+Hq:Button({ Name = "Open Title Selection", Callback = function()
 		Q.Remotes.CommF_:InvokeServer("getTitles", true);
 		d.PlayerGui.Main.Titles.Visible = true;
 	end });
-Hq:AddToggle("Hq_AddToggle_184", {
-	Title = "Disable Chat GUI",
-	Description = "",
+Hq:Toggle({
+	Name = "Disable Chat GUI",
 	Default = false,
 	Callback = function(Y)
 		_G.Rechat = Y;
@@ -10147,9 +10009,8 @@ Hq:AddToggle("Hq_AddToggle_184", {
 		end;
 	end,
 });
-Hq:AddToggle("Hq_AddToggle_185", {
-	Title = "Disable Leader Board GUI",
-	Description = "",
+Hq:Toggle({
+	Name = "Disable Leader Board GUI",
 	Default = false,
 	Callback = function(Y)
 		ReLeader = Y;
@@ -10161,15 +10022,14 @@ Hq:AddToggle("Hq_AddToggle_185", {
 		end;
 	end,
 });
-Hq:AddButton({ Title = "Set Pirate Team", Callback = function()
+Hq:Button({ Name = "Set Pirate Team", Callback = function()
 		Pirates();
 	end });
-Hq:AddButton({ Title = "Set Marine Team", Callback = function()
+Hq:Button({ Name = "Set Marine Team", Callback = function()
 		Marines();
 	end });
-Hq:AddToggle("Hq_AddToggle_186", {
-	Title = "Unlock All Portals",
-	Description = "unlocked portal for who doesn\'t defeat rip_indra",
+Hq:Toggle({
+	Name = "Unlock All Portals",
 	Default = false,
 	Callback = function(Y)
 		_G.PortalUnLock = Y;
@@ -10192,7 +10052,7 @@ spawn(function()
 		end);
 	end;
 end);
-local Sq = jz:AddSection("Graphics / Haki Stats");
+local Sq = jz:Section({ Name = "Graphics / Haki Stats" });
 HakiSt = {
 		"State 0",
 		"State 1",
@@ -10201,17 +10061,15 @@ HakiSt = {
 		"State 4",
 		"State 5",
 	};
-Sq:AddDropdown("Sq_AddDropdown_19", {
-	Title = "Select Haki States",
-	Description = "",
-	Values = HakiSt,
+Sq:Dropdown({
+	Name = "Select Haki States",
+	Items = HakiSt,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		_G.SelectStateHaki = Y;
 	end,
 });
-Sq:AddButton({ Title = "ChangeBusoStage", Callback = function()
+Sq:Button({ Name = "ChangeBusoStage", Callback = function()
 		if _G.SelectStateHaki == "State 0" then
 			Q.Remotes.CommF_:InvokeServer("ChangeBusoStage", 0);
 		elseif _G.SelectStateHaki == "State 1" then
@@ -10226,9 +10084,8 @@ Sq:AddButton({ Title = "ChangeBusoStage", Callback = function()
 			Q.Remotes.CommF_:InvokeServer("ChangeBusoStage", 5);
 		end;
 	end });
-Sq:AddToggle("Sq_AddToggle_187", {
-	Title = "Turn on RTX Mode",
-	Description = "",
+Sq:Toggle({
+	Name = "Turn on RTX Mode",
 	Default = false,
 	Callback = function(Y)
 		_G.RTXMode = Y;
@@ -10273,17 +10130,17 @@ Sq:AddToggle("Sq_AddToggle_187", {
 		end);
 	end,
 });
-Sq:AddButton({ Title = "Turn on Fast Mode", Callback = function()
+Sq:Button({ Name = "Turn on Fast Mode", Callback = function()
 		for Y, d in next, workspace:GetDescendants() do
 			if table.find(t, d.ClassName) then
 				d.Material = "Plastic";
 			end;
 		end;
 	end });
-Sq:AddButton({ Title = "Turn on Low CPU", Callback = function()
+Sq:Button({ Name = "Turn on Low CPU", Callback = function()
 		LowCpu();
 	end });
-Sq:AddButton({ Title = "Turn on increase Boats", Callback = function()
+Sq:Button({ Name = "Turn on increase Boats", Callback = function()
 		for Y, R in pairs(workspace.Boats:GetDescendants()) do
 			if table.find(jF, R.Name) and tostring(R.Owner.Value) == tostring(d.Name) then
 				R.VehicleSeat.MaxSpeed = 350;
@@ -10293,7 +10150,7 @@ Sq:AddButton({ Title = "Turn on increase Boats", Callback = function()
 			end;
 		end;
 	end });
-Sq:AddButton({ Title = "Remove Sky Fog", Callback = function()
+Sq:Button({ Name = "Remove Sky Fog", Callback = function()
 		if F:FindFirstChild("LightingLayers") then
 			F.LightingLayers:Destroy();
 		end;
@@ -10304,8 +10161,8 @@ Sq:AddButton({ Title = "Remove Sky Fog", Callback = function()
 			F.FantasySky:Destroy();
 		end;
 	end });
-local oq = jz:AddSection("Configure - God");
-oq:AddButton({ Title = "Rain Fruits (Client)", Callback = function()
+local oq = jz:Section({ Name = "Configure - God" });
+oq:Button({ Name = "Rain Fruits (Client)", Callback = function()
 		for Y, R in pairs((game:GetObjects("rbxassetid://14759368201"))[1]:GetChildren()) do
 			R.Parent = game.Workspace.Map;
 			R:MoveTo(d.Character.PrimaryPart.Position + Vector3.new(math.random(-50, 50), 100, math.random(-50, 50)));
@@ -10320,7 +10177,7 @@ oq:AddButton({ Title = "Rain Fruits (Client)", Callback = function()
 			end);
 		end;
 	end });
-oq:AddToggle("oq_AddToggle_188", { Title = "Turn on Full Bright", Default = false, Callback = function(Y)
+oq:Toggle({ Name = "Turn on Full Bright", Default = false, Callback = function(Y)
 		bright = Y;
 		if Y then
 			F.Ambient = Color3.new(1, 1, 1);
@@ -10333,19 +10190,16 @@ oq:AddToggle("oq_AddToggle_188", { Title = "Turn on Full Bright", Default = fals
 		end;
 	end });
 Cheat_DayNight = { "Day", "Night" };
-oq:AddDropdown("oq_AddDropdown_20", {
-	Title = "Select Time",
-	Description = "",
-	Values = Cheat_DayNight,
+oq:Dropdown({
+	Name = "Select Time",
+	Items = Cheat_DayNight,
 	Default = false,
-	Multi = false,
 	Callback = function(Y)
 		_G.SelectDN = Y;
 	end,
 });
-oq:AddToggle("oq_AddToggle_189", {
-	Title = "Turn on Time",
-	Description = "",
+oq:Toggle({
+	Name = "Turn on Time",
 	Default = false,
 	Callback = function(Y)
 		_G.daylightN = Y;
@@ -10362,9 +10216,8 @@ task.spawn(function()
 		end;
 	end;
 end);
-oq:AddToggle("oq_AddToggle_190", {
-	Title = "Turn on Walk on Water",
-	Description = "walk on water",
+oq:Toggle({
+	Name = "Turn on Walk on Water",
 	Default = true,
 	Callback = function(Y)
 		_G.WalkWater_Part = Y;
@@ -10376,9 +10229,8 @@ oq:AddToggle("oq_AddToggle_190", {
 		end;
 	end,
 });
-oq:AddToggle("oq_AddToggle_191", {
-	Title = "Turn on Ice Walk",
-	Description = "Ice walk just like walk on water but have ice effect",
+oq:Toggle({
+	Name = "Turn on Ice Walk",
 	Default = false,
 	Callback = function(Y)
 		_G.WalkWater = Y;
@@ -10412,7 +10264,13 @@ local function Tq(Y)
 		return false;
 	end;
 	local d = Y:FindFirstChild("Humanoid");
-	return d and d.Health > 0;
+	if d then
+		return d.Health > 0;
+	end;
+	-- Sea Beast / Leviathan tidak punya Humanoid; nyawanya di NumberValue "Health".
+	-- Tanpa cabang ini mereka selalu dianggap mati dan tidak pernah jadi target.
+	local R = Y:FindFirstChild("Health");
+	return R ~= nil and R.Value > 0;
 end;
 local function kq(Y, d)
 	local R = (game:GetService("Workspace")).Enemies:GetChildren();
@@ -10425,6 +10283,21 @@ local function kq(Y, d)
 			local Y = (Q.Position - a).Magnitude;
 			if Y <= d then
 				table.insert(r, R);
+			end;
+		end;
+	end;
+	-- Sea Beast / Leviathan tinggal di workspace.SeaBeasts, bukan Enemies.
+	-- Sebelumnya container ini tidak pernah dipindai, jadi #r == 0 dan
+	-- AttackNoCoolDown() langsung return -- Sea Event tidak pernah menyerang.
+	local w = (game:GetService("Workspace")):FindFirstChild("SeaBeasts");
+	if w then
+		for Y, R in ipairs(w:GetChildren()) do
+			local Q = R:FindFirstChild("HumanoidRootPart");
+			if Q and Tq(R) then
+				local Y = (Q.Position - a).Magnitude;
+				if Y <= d then
+					table.insert(r, R);
+				end;
 			end;
 		end;
 	end;
@@ -10521,24 +10394,35 @@ end;
 CameraShakerR = require(game.ReplicatedStorage.Util.CameraShaker);
 CameraShakerR:Stop();
 get_Monster = function()
+		local MyHRP = d.Character and d.Character:FindFirstChild("HumanoidRootPart");
+		if not MyHRP then
+			return false;
+		end;
 		for Y, R in pairs(workspace.Enemies:GetChildren()) do
 			local Q = R:FindFirstChild("UpperTorso") or R:FindFirstChild("Head");
+			-- Pakai Q, bukan R.Head: enemy yang cuma punya UpperTorso bikin
+			-- R.Head error dan menghentikan seluruh scan lewat pcall di caller,
+			-- termasuk cabang SeaBeasts di bawahnya.
 			if R:FindFirstChild("HumanoidRootPart", true) and Q then
-				if (R.Head.Position - d.Character.HumanoidRootPart.Position).Magnitude <= 50 then
+				if (Q.Position - MyHRP.Position).Magnitude <= 50 then
 					return true, Q.Position;
 				end;
 			end;
 		end;
-		for Y, d in pairs(workspace.SeaBeasts:GetChildren()) do
-			if d:FindFirstChild("HumanoidRootPart") and (d:FindFirstChild("Health") and d.Health.Value > 0) then
-				return true, d.HumanoidRootPart.Position;
+		for Y, R in pairs(workspace.SeaBeasts:GetChildren()) do
+			if R:FindFirstChild("HumanoidRootPart") and (R:FindFirstChild("Health") and R.Health.Value > 0) then
+				return true, R.HumanoidRootPart.Position;
 			end;
 		end;
-		for Y, d in pairs(workspace.Enemies:GetChildren()) do
-			if d:FindFirstChild("Health") and (d.Health.Value > 0 and d:FindFirstChild("VehicleSeat")) then
-				return true, d.Engine.Position;
+		for Y, R in pairs(workspace.Enemies:GetChildren()) do
+			if R:FindFirstChild("Health") and (R.Health.Value > 0 and R:FindFirstChild("VehicleSeat")) then
+				local Eng = R:FindFirstChild("Engine");
+				if Eng then
+					return true, Eng.Position;
+				end;
 			end;
 		end;
+		return false;
 	end;
 Actived = function()
 		local Y = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
@@ -10556,17 +10440,21 @@ task.spawn(function()
 			end;
 			AttackNoCoolDown();
 			local Y = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool");
-			local d = Y.ToolTip;
+			if not Y then
+				return;
+			end;
 			local R, Q = get_Monster();
-			if d == "Blox Fruit" then
-				if R then
-					local d = Y:FindFirstChild("LeftClickRemote");
-					if d then
-						Actived();
-						d:FireServer(Vector3.new(.01, -500, .01), 1, true);
-						d:FireServer(false);
-					end;
-				end;
+			if not R then
+				return;
+			end;
+			-- Semua weapon punya LeftClickRemote (Melee/Sword/Gun/Blox Fruit).
+			-- Sebelumnya M1 hanya ditembak saat ToolTip == "Blox Fruit", jadi Sea
+			-- Event yang bertarung pakai Melee/Sword tidak pernah menyerang.
+			local Rem = Y:FindFirstChild("LeftClickRemote");
+			if Rem then
+				Actived();
+				Rem:FireServer(Vector3.new(.01, -500, .01), 1, true);
+				Rem:FireServer(false);
 			end;
 		end);
 	end);
@@ -10586,11 +10474,7 @@ pcall(function()
 	end;
 end);
 
--- ===== Fluent finalize =====
-Window:SelectTab(1)
-Fluent:Notify({ Title = "Simple Hub", Content = "Loaded successfully — Fluent UI edition.", Duration = 6 })
-
--- ===== Floating open/close UI button (banana icon, like original) =====
+-- ===== Floating open/close UI button (banana icon) =====
 do
 	local Players = game:GetService("Players")
 	local UIS = game:GetService("UserInputService")
@@ -10614,7 +10498,7 @@ do
 	Btn.BorderSizePixel = 0
 	Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	Btn.AnchorPoint = Vector2.new(0, 1)
-	Btn.Image = "rbxassetid://80652521523958"
+	Btn.Image = "rbxassetid://139685592317678"
 	Btn.Size = UDim2.new(0, 50, 0, 50)
 	Btn.Position = UDim2.new(0.01, 0, 0.99, 0)
 	Btn.AutoButtonColor = true
@@ -10623,7 +10507,7 @@ do
 	corner.CornerRadius = UDim.new(1, 8)
 	local stroke = Instance.new("UIStroke", Btn)
 	stroke.Thickness = 0.6
-	stroke.Color = Color3.fromRGB(59, 130, 246)
+	stroke.Color = Color3.fromRGB(55, 60, 65)
 
 	-- Draggable (mouse + touch), only toggles on a real click (not a drag)
 	local dragging, moved, dragStart, startPos
@@ -10651,40 +10535,10 @@ do
 		if input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch then
 			if dragging and not moved then
-				-- toggle the Fluent window's ScreenGui
-				if Fluent.GUI then
-					Fluent.GUI.Enabled = not Fluent.GUI.Enabled
-				end
+				-- toggle the Stellar window (show/hide main frame)
+				Window:SetOpen(not Window.IsOpen)
 			end
 			dragging = false
-		end
-	end)
-end
-
--- ===== Fire single-select dropdown callbacks with their Default on load (FIX) =====
--- The original custom UI fired every dropdown's callback with its default value
--- at creation time (seeding _G.ChooseWP, raid/sea options, etc). Fluent toggles
--- fire on init but Fluent DROPDOWNS do NOT, so those _G flags would stay nil until
--- manually clicked — breaking auto-farm weapon equip, raid attack, and buy-boat.
--- Re-firing each single-select dropdown's callback here restores that behavior.
-do
-	local ids = {
-		"qz_AddDropdown_1", "Vz_AddDropdown_2", "Vz_AddDropdown_3", "IF_AddDropdown_4",
-		"SF_AddDropdown_5", "gF_AddDropdown_6", "CF_AddDropdown_7", "PF_AddDropdown_8",
-		"PF_AddDropdown_9", "dq_AddDropdown_10", "rq_AddDropdown_11", "rq_AddDropdown_12",
-		"Wq_AddDropdown_13", "Nq_AddDropdown_14", "Dq_AddDropdown_15", "Aq_AddDropdown_16",
-		"Aq_AddDropdown_17", "cq_AddDropdown_18", "Sq_AddDropdown_19", "oq_AddDropdown_20",
-	}
-	task.spawn(function()
-		for _, id in ipairs(ids) do
-			local opt = Fluent.Options and Fluent.Options[id]
-			-- Only single-select dropdowns with a non-table Value (matches the
-			-- original's `if typeof(K) ~= "table"` guard before calling n(K)).
-			if opt and not opt.Multi and opt.Value ~= nil and typeof(opt.Value) ~= "table" then
-				pcall(function()
-					opt:SetValue(opt.Value)
-				end)
-			end
 		end
 	end)
 end
