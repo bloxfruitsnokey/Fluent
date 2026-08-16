@@ -14,7 +14,7 @@ pcall(function()
 	end;
 end);
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/bloxfruitsnokey/Wind/refs/heads/main/combat"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/bloxfruitsnokey/Fluent/refs/heads/main/combat"))()
 local Y = game.Players;
 local d = Y.LocalPlayer;
 local R = d.Character.HumanoidRootPart;
