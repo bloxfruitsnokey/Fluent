@@ -10617,14 +10617,14 @@ do
 	Btn.AnchorPoint = Vector2.new(0, 1)
 	Btn.Image = "rbxassetid://133046239463365"
 	Btn.Size = UDim2.new(0, 50, 0, 50)
-	Btn.Position = UDim2.new(0.01, 0, 0.20, 0)
+	Btn.Position = UDim2.new(0.01, 0, 0.30, 0)
 	Btn.AutoButtonColor = true
 
 	local corner = Instance.new("UICorner", Btn)
 	corner.CornerRadius = UDim.new(1, 8)
 	local stroke = Instance.new("UIStroke", Btn)
 	stroke.Thickness = 0.6
-	stroke.Color = Color3.fromRGB(59, 130, 246)
+	stroke.Color = Color3.fromRGB(10, 10, 10)
 
 	-- Draggable (mouse + touch), only toggles on a real click (not a drag)
 	local dragging, moved, dragStart, startPos
